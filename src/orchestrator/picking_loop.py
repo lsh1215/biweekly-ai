@@ -84,12 +84,15 @@ class PickingLoop:
         item = task.item_name
         self.logger.info("loop", f"Picking {item}", {"attempt": task.attempts})
 
-        # IDLE → PLANNING
-        self.task_manager.transition(task, TaskState.PLANNING)
-        instruction = self.planner.generate_instruction(task)
-
-        # PLANNING → EXECUTING
-        self.task_manager.transition(task, TaskState.EXECUTING)
+        if task.state == TaskState.REPLANNING:
+            # Retry: REPLANNING → EXECUTING (skip PLANNING)
+            instruction = self.planner.generate_instruction(task)
+            self.task_manager.transition(task, TaskState.EXECUTING)
+        else:
+            # Fresh: IDLE → PLANNING → EXECUTING
+            self.task_manager.transition(task, TaskState.PLANNING)
+            instruction = self.planner.generate_instruction(task)
+            self.task_manager.transition(task, TaskState.EXECUTING)
 
         # Check if auto-skipped due to max retries
         if task.state == TaskState.SKIPPED:
