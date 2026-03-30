@@ -1,0 +1,21 @@
+You are a warehouse picking planner. Create an optimal picking plan for the following order.
+
+Order ID: {order_id}
+Items to pick: {items}
+
+Current robot position: Home (origin)
+Collection box position: x=-1.0, y=0.0
+
+Shelf locations:
+- Shelf A: x=2.0, y=0.0 (items: apple, bottle)
+- Shelf B: x=2.0, y=2.0 (items: book, box)
+- Shelf C: x=2.0, y=-2.0 (items: can, cup)
+
+Create an optimal picking sequence (nearest-first).
+Respond in JSON:
+{{
+  "tasks": [
+    {{"item": "name", "shelf": "A/B/C", "action": "pick", "priority": 1}},
+    ...
+  ]
+}}
