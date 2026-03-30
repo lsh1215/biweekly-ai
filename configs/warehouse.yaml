@@ -1,0 +1,30 @@
+# Warehouse layout configuration
+warehouse:
+  name: "demo_warehouse"
+  floor:
+    width: 10.0
+    length: 10.0
+
+  shelves:
+    - id: "A"
+      position: { x: 2.0, y: 0.0, z: 0.0 }
+      slots: 2
+      items: ["apple", "bottle"]
+    - id: "B"
+      position: { x: 2.0, y: 2.0, z: 0.0 }
+      slots: 2
+      items: ["book", "box"]
+    - id: "C"
+      position: { x: 2.0, y: -2.0, z: 0.0 }
+      slots: 2
+      items: ["can", "cup"]
+
+  collection_box:
+    position: { x: -1.0, y: 0.0, z: 0.0 }
+    size: { width: 0.5, length: 0.5, height: 0.3 }
+
+  camera:
+    overhead:
+      position: { x: 1.0, y: 0.0, z: 3.0 }
+      fov: 90
+      resolution: { width: 640, height: 480 }

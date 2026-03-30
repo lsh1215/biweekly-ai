@@ -1,0 +1,52 @@
+# Pickable objects configuration
+objects:
+  - name: "apple"
+    shape: "sphere"
+    radius: 0.04
+    mass: 0.2
+    color: { r: 1.0, g: 0.0, b: 0.0 }
+    shelf: "A"
+    slot: 0
+
+  - name: "bottle"
+    shape: "cylinder"
+    radius: 0.03
+    height: 0.15
+    mass: 0.3
+    color: { r: 0.0, g: 0.5, b: 1.0 }
+    shelf: "A"
+    slot: 1
+
+  - name: "book"
+    shape: "box"
+    size: { x: 0.15, y: 0.10, z: 0.03 }
+    mass: 0.4
+    color: { r: 0.0, g: 0.7, b: 0.0 }
+    shelf: "B"
+    slot: 0
+
+  - name: "box"
+    shape: "box"
+    size: { x: 0.10, y: 0.10, z: 0.10 }
+    mass: 0.5
+    color: { r: 0.8, g: 0.6, b: 0.2 }
+    shelf: "B"
+    slot: 1
+
+  - name: "can"
+    shape: "cylinder"
+    radius: 0.03
+    height: 0.12
+    mass: 0.35
+    color: { r: 0.8, g: 0.8, b: 0.8 }
+    shelf: "C"
+    slot: 0
+
+  - name: "cup"
+    shape: "cylinder"
+    radius: 0.04
+    height: 0.10
+    mass: 0.15
+    color: { r: 1.0, g: 1.0, b: 1.0 }
+    shelf: "C"
+    slot: 1

@@ -1,0 +1,29 @@
+services:
+  gazebo-sim:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: warehouse_gazebo
+    ports:
+      - "5555:5555"   # ZMQ pub (images from sim)
+      - "5556:5556"   # ZMQ sub (commands to sim)
+      - "11345:11345" # Gazebo transport
+    volumes:
+      - ../src/simulation/worlds:/ros2_ws/worlds:ro
+      - ../src/simulation/models:/ros2_ws/models:ro
+      - ../src/simulation/launch:/ros2_ws/launch:ro
+      - ../src/simulation/config:/ros2_ws/config:ro
+      - ../src/simulation/bridge_docker.py:/ros2_ws/bridge/bridge_docker.py:ro
+      - ../configs:/ros2_ws/configs:ro
+      - sim-data:/ros2_ws/data
+    environment:
+      - ROS_DOMAIN_ID=42
+      - GZ_SIM_RESOURCE_PATH=/ros2_ws/models
+      # Software rendering for Docker on macOS
+      - LIBGL_ALWAYS_SOFTWARE=1
+      - MESA_GL_VERSION_OVERRIDE=3.3
+    mem_limit: 6g
+    restart: unless-stopped
+
+volumes:
+  sim-data:
