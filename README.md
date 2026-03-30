@@ -69,7 +69,7 @@ An LLM-based orchestrator (Planner + Verifier) directs a Vision-Language-Action 
 
 | Metric | VLA-Only | Agent+VLA | Improvement |
 |--------|----------|-----------|-------------|
-| Success Rate | 83.3% | 100.0% | +16.7% |
+| Success Rate (mock) | 83.3% | 100.0% | +16.7% |
 | Recovery | None | Grip retry + floor pickup | Full |
 | Multi-item | Single attempt | 3 retries + skip | Robust |
 
@@ -165,6 +165,23 @@ IDLE → PLANNING → EXECUTING → VERIFYING → SUCCESS
                                   ▼ (max retries)
                                SKIPPED
 ```
+
+## Current Status & Known Limitations
+
+This project is a **portfolio demonstration** of the agentic VLA architecture. The software architecture (state machine, Planner/Verifier/Executor separation, error recovery loop, prompt design) is fully functional with 140 passing tests.
+
+**Known limitations:**
+
+1. **SmolVLA inference is mock**: The model loads on MPS correctly, but `predict()` uses random action sampling (`torch.randn + tanh`) instead of the full LeRobot inference pipeline. The model is not fine-tuned on the Gazebo domain. Real inference requires connecting the LeRobot tokenizer and action head.
+
+2. **ROS2 bridge stubs**: `bridge_docker.py` has 3 unimplemented ROS2 `rclpy` publish/subscribe calls (ZMQ transport layer is complete). Filling these in connects the bridge to actual Gazebo topics.
+
+3. **Benchmark numbers are seeded mock results**: The 83.3%/100.0% figures come from `random.Random(42)` with hardcoded probability constants, not from actual Gazebo robot trials. They demonstrate the benchmark framework, not measured performance.
+
+**Next steps to make it real:**
+- Connect SmolVLA real inference via LeRobot pipeline
+- Fill ROS2 bridge stubs and run end-to-end in Docker + Gazebo
+- Collect sim data and fine-tune SmolVLA on Gazebo domain
 
 ## References
 
