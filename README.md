@@ -1,6 +1,6 @@
-# two-weeks-ai-challenge
+# biweekly-ai
 
-2주에 하나씩 AI로 뭔가 만드는 개인 챌린지 레포.
+2주에 하나씩 AI로 뭔가 만드는 개인 레포.
 
 각 챌린지는 `challenge-N/` 디렉토리 안에 독립적으로 들어간다.
 
