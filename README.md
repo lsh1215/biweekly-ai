@@ -21,4 +21,5 @@
 
 - [`CLAUDE.md`](./CLAUDE.md) — Claude가 지킬 규칙 (자동 로드)
 - [`PLAYBOOK.md`](./PLAYBOOK.md) — 오버나이트 프로토콜 상세
+- [`HARNESS.md`](./HARNESS.md) — 하네스 엔지니어링 원칙 + 도구 카탈로그
 - [`challenge-1/RETRO.md`](./challenge-1/RETRO.md) — 이전 회고

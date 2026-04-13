@@ -46,7 +46,6 @@ Thumbs.db
 *.h5
 wandb/
 runs/
-logs/
 outputs/
 checkpoints/
 results/
@@ -64,6 +63,9 @@ datasets/
 # HuggingFace cache
 .cache/
 
-# Claude Code
-.claude/
-.omc/
+# Claude Code — harness config는 커밋하지만 런타임 상태는 제외
+# (.claude/는 추적, .omc/state·sessions만 무시)
+.omc/state/
+.omc/sessions/
+.omc/project-memory.json
+.omc/notepad.md

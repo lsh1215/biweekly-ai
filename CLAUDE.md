@@ -52,7 +52,10 @@ challenge-N/
 ## 참고 문서
 
 - `PLAYBOOK.md` — 오버나이트 프로토콜 상세 (주제 선정, 자동 재개 템플릿, 검증)
+- `HARNESS.md` — 하네스 엔지니어링 원칙 + 도구 카탈로그 + 챌린지별 기록 템플릿
 - `challenge-1/RETRO.md` — 첫 번째 회고 (VLA 프로젝트)
+
+새 챌린지 시작 시 `challenge-N/HARNESS.md`도 반드시 작성 (어떤 도구·훅·스킬을 왜 골랐는지).
 
 ## OMC 관련
 
