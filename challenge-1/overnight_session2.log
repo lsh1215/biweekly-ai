@@ -1,0 +1,28 @@
+
+
+## Sprint 2 & Sprint 3 Complete
+
+Both sprints are done. Here's the summary:
+
+### Sprint 2: VLA Integration
+- **ActionConverter**: Maps VLA normalized [-1,1] outputs to joint angles with limit clipping + delta mode
+- **ModelLoader**: Factory for SmolVLA/ScriptedPolicy with SmolVLAWrapper for LeRobot
+- **VLANode**: Image preprocessing, inference timing, trajectory generation
+- **Single pick test**: End-to-end camera → VLA → robot pipeline validated (SUCCESS)
+- **18 tests passing**
+
+### Sprint 3: Agentic Orchestrator
+- **Planner**: Order parsing from natural language, plan generation from YAML config, replanning on failure (floor pickup for drops)
+- **Verifier**: Vision-based pick/place/grip verification returning structured results with suggested_action
+- **TaskManager**: Full state machine (IDLE→PLANNING→EXECUTING→VERIFYING→SUCCESS/REPLANNING→SKIPPED) with valid transition enforcement, auto-skip at max retries, event callbacks
+- **PickingLoop**: Integrated Plan→Execute→Verify loop with autonomous retry
+- **5 prompt templates** for claude -p
+- **40 tests passing**
+
+### Total: 99 tests passing, 0 failures across Sprint 0-3
+
+```
+b6f926c feat: complete Sprint 0 + Sprint 1
+5410fcc feat: complete Sprint 2 (VLA Integration)
+d4ac62c feat: complete Sprint 3 (Agentic Orchestrator)
+```

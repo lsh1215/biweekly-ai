@@ -1,0 +1,30 @@
+
+
+All tasks complete. Here's the final summary:
+
+## Project Complete — Warehouse Picker VLA
+
+### Sprint 4: Error Recovery + Multi-Item
+- **19 tests** — grip failure detection, drop recovery (floor pickup), multi-item sequential processing, skip+continue, integration test with SequencedVerifier
+- Fixed picking loop to handle REPLANNING → EXECUTING retries correctly
+- Commit: `07b2d3c`
+
+### Sprint 5: Expansions + Demo + Polish  
+- **15 tests** — logging/replay, reasoning trace, A/B benchmark, visualization, adversarial demo
+- **6 new scripts**: benchmark.py, visualize_comparison.py, demo_adversarial.py, replay.py, demo.sh
+- **Reasoning trace UI** with rich library color output
+- **A/B chart** generated at `docs/assets/ab_comparison.png`
+- **README.md** with architecture diagram, benchmark table, quick start
+- **docs/ARCHITECTURE.md** with detailed data flow
+- Commit: `3b88bab`
+
+### Final Numbers
+
+| Metric | Result |
+|--------|--------|
+| Total tests | **120 passed**, 0 failed |
+| Sprints completed | 6/6 (Sprint 0-5) |
+| VLA-Only success rate | 83.3% |
+| Agent+VLA success rate | **100.0%** (+16.7%) |
+| Adversarial recovery | 3/3 (100%) |
+| Demo script | `bash scripts/demo.sh` |
