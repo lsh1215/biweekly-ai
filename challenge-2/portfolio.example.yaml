@@ -1,0 +1,12 @@
+# 3종목, TSLA 집중 (cost-basis-based ≈ 57.9% incl. cash) — 50%+ risk-gate demo.
+positions:
+  - ticker: TSLA
+    quantity: 30
+    cost_basis_usd: 8400.00
+  - ticker: AAPL
+    quantity: 15
+    cost_basis_usd: 3500.00
+  - ticker: NVDA
+    quantity: 3
+    cost_basis_usd: 2100.00
+cash_usd: 500.00

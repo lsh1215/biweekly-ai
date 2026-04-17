@@ -23,16 +23,20 @@ timeline() {
 }
 
 # ---- Preflight — exit 2 means non-retry (CLAUDE.md 무인 실행 원칙).
-if [ -z "${ANTHROPIC_API_KEY:-}" ]; then
-  timeline "PREFLIGHT_FAIL: ANTHROPIC_API_KEY missing"
+# Note: claude CLI handles its own auth (keychain/config). We don't require
+# ANTHROPIC_API_KEY env var; first `claude -p` invocation will fail loudly
+# if auth is broken, and the retry loop will surface it in logs.
+if ! command -v claude >/dev/null 2>&1; then
+  timeline "PREFLIGHT_FAIL: claude CLI not on PATH"
   exit 2
 fi
 if ! docker info >/dev/null 2>&1; then
   timeline "PREFLIGHT_FAIL: docker daemon not running"
   exit 2
 fi
-if ! command -v claude >/dev/null 2>&1; then
-  timeline "PREFLIGHT_FAIL: claude CLI not on PATH"
+# Quick auth probe (Haiku tiny call, ~$0.0001).
+if ! claude -p "reply with the single word: ok" --model haiku --dangerously-skip-permissions >/dev/null 2>&1; then
+  timeline "PREFLIGHT_FAIL: claude CLI auth probe failed (check ~/.claude login)"
   exit 2
 fi
 

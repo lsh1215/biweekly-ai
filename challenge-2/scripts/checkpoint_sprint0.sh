@@ -4,13 +4,20 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
+# Activate project venv if present (Sprint 0 convention — homebrew Python blocks
+# global pip per PEP 668, so overnight sessions install into ./.venv).
+if [ -f "$ROOT_DIR/.venv/bin/activate" ]; then
+  # shellcheck disable=SC1091
+  source "$ROOT_DIR/.venv/bin/activate"
+fi
+
 echo "[checkpoint-0] pytest fixtures + schema"
 pytest tests/test_fixtures.py tests/test_portfolio_schema.py -q
 
 echo "[checkpoint-0] Postgres reachable"
-docker-compose up -d postgres >/dev/null
+docker compose up -d postgres >/dev/null
 for i in {1..30}; do
-  docker-compose exec -T postgres pg_isready -U ria -d ria >/dev/null 2>&1 && break
+  docker compose exec -T postgres pg_isready -U ria -d ria >/dev/null 2>&1 && break
   sleep 1
 done
 

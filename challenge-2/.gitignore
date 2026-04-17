@@ -1,0 +1,26 @@
+# challenge-2 local overrides
+# Postgres volume (docker-compose mount target) — must not be committed
+data/pgdata/
+
+# Venv for overnight execution
+.venv/
+
+# Runtime logs / reports — committed dir but not contents
+logs/*.log
+logs/*.txt
+logs/overnight.out
+reports/*.md
+reports/*.log
+reports/pip.log
+reports/cost_summary.md
+
+# Overnight PID
+.overnight.pid
+
+# half_scope flag (runtime carry-over signal)
+.half_scope
+
+# Python build artifacts
+__pycache__/
+*.egg-info/
+src/*.egg-info/

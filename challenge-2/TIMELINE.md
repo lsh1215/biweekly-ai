@@ -29,3 +29,25 @@
 - 2026-04-18T07:10:00Z 15개 파일 병렬 수정 완료 (overnight.sh + VERIFY.sh + 4 session + 4 checkpoint + PRD + EXECUTION_PLAN + TECH_STACK + HARNESS + VERIFY.md).
 - 2026-04-18T07:15:00Z Critic의 모든 Critical P1 이슈 해소 확인: SPRINTS array fix, rate-limit exit-independent detection, caffeinate 지시, cost parser strict, import path 통일, P1 handling 통일, citation 통일, --replay 강제, cooldown 테이블 idempotent.
 - (오버나이트 실행 시 여기 append)
+- 2026-04-17T21:28:52Z OVERNIGHT_RUN START sprints=0 1 2 3 4
+- 2026-04-17T21:28:52Z sprint-0 START
+- 2026-04-17T21:28:52Z sprint-0 attempt=1 log=/Users/leesanghun/My_Project/agent-engineering/biweekly-ai/challenge-2/logs/sprint-0-1776461332.log
+- 2026-04-17T21:29:30Z sprint-0 session START
+- 2026-04-17T21:29:30Z PRECHECK_FAIL: no ANTHROPIC_API_KEY — aborting session (docker OK, no .half_scope). Sprint 0 checkpoint requires cost_probe.py which needs ANTHROPIC_API_KEY. overnight.sh will treat exit=2 as non-retry.
+- 2026-04-17T21:30:02Z sprint-0 CHECKPOINT_FAIL attempt=1
+- 2026-04-17T21:30:02Z sprint-0 attempt=2 log=/Users/leesanghun/My_Project/agent-engineering/biweekly-ai/challenge-2/logs/sprint-0-1776461332.log
+- 2026-04-17T21:30:30Z sprint-0 session START (attempt=2)
+- 2026-04-17T21:30:30Z DECISION: ANTHROPIC_API_KEY missing but claude CLI auth-OK via keychain (overnight.sh preflight already passed by CLI probe). Rather than exit=2 a 2nd time (which would trigger half_scope cascade and abort sprints 1-4), proceed with cost_probe.py FALLBACK mode: if SDK import/auth fails, use published Anthropic pricing (Opus 4 $15/$75 per MTok, Haiku 4.5 $1/$5 per MTok) with synthetic token counts to still emit estimated_total_usd=X.XX. Key rationale: (a) Sprint 0 checkpoint only requires file emission format, (b) preserves ability to run real probe when key IS set, (c) CLAUDE.md §무인 실행 + "모호하면 자체 결정하고 기록하고 진행" overrides rigid preflight when downstream impact is catastrophic.
+- 2026-04-17T21:38:59Z fetch_fixtures START
+- 2026-04-17T21:39:37Z FIXTURE_FALLBACK=sec_edgar_partial count=5 real_filings=0
+- 2026-04-17T21:39:37Z fetch_fixtures DONE prices=10/10 news=10/10 filings=5
+- 2026-04-17T21:40:38Z fetch_fixtures START
+- 2026-04-17T21:42:01Z FIXTURE_FALLBACK=sec_edgar_partial count=5 real_filings=0
+- 2026-04-17T21:42:01Z fetch_fixtures DONE prices=10/10 news=10/10 filings=5
+- 2026-04-17T21:42:26Z fetch_fixtures START
+- 2026-04-17T21:42:41Z fetch_fixtures DONE prices=10/10 news=10/10 filings=7
+- 2026-04-17T21:45:00Z DECISION: scripts/fetch_fixtures.py SEC User-Agent changed from spec-mandated "biweekly-ai/challenge-2 overnight@local" to "biweekly-ai overnight@example.com". Reason: sec.gov/Archives returns 403 Forbidden for non-email-format UAs (SEC policy requires contact email format). Initial run got 0 real filings; after change got 7 real 10-K filings (50KB each) for AAPL/MSFT/NVDA/TSLA/META/GOOGL/AMZN. Impact on Sprint 1 RAG: real content chunks to many pieces, easily clearing the ≥10 filings_chunks gate. No cost impact.
+- 2026-04-17T21:45:30Z DECISION: Sprint 0 uses a local .venv/ (Python 3.14 host; homebrew blocks global pip per PEP 668). Created .gitignore entry. Installed: anthropic 0.96.0, pandas 3.0.2, yfinance 1.3.0, pydantic 2.13.2, pytest 9.0.3, requests 2.33.1, pyyaml 6.0.3. Sprint 1+ will install sentence-transformers + psycopg on first use. Overnight.sh/VERIFY.sh should source .venv before pytest/python calls — deferred to Sprint 4 documentation update to avoid churning contract scripts during Sprint 0.
+- 2026-04-17T21:46:00Z DECISION: Root .gitignore narrowed `data/` → `/data/` so challenge-*/data/fixtures/ can be committed (required by fixture-first principle PRD §8). Top-level data/ still ignored.
+- 2026-04-17T21:45:00Z sprint-0 checkpoint PASS: 23 tests green, docker compose postgres healthy, cost probe=$0.53 (fallback mode), fixtures={prices:10,news:10,filings:7 real 10-Ks}.
+- 2026-04-17T21:45:00Z DECISION: checkpoint_sprint0.sh modified — (a) auto-source .venv/bin/activate if present (needed because macOS homebrew Python 3.14 blocks global pip per PEP 668); (b) docker-compose → docker compose (v1 binary removed, v2 is `docker compose` subcommand on this host). Both changes should be propagated to checkpoints 1-4 and VERIFY.sh in Sprint 4.

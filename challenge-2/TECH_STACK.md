@@ -86,18 +86,23 @@
 3. 같은 세션에서 이 `TECH_STACK.md` 표도 실측 값으로 **동시 갱신**.
 4. 이후 Sprint 1~4는 Sprint 0이 잠근 버전 그대로 사용. 변경 금지.
 
-**해당 시점까지 baseline 참고값** (Sprint 0이 최신 stable로 덮어씀):
+**Sprint 0 resolved values** (2026-04-17, pypi latest stable; pinned `~=major.minor` in `pyproject.toml`):
 
-| 패키지 | baseline | 비고 |
+| 패키지 | 잠금 버전 | 비고 |
 |-------|---------|-----|
-| anthropic | TBD (Sprint 0) | messages API tool_use 표준 |
-| sentence-transformers | TBD | MiniLM-L6-v2 384-dim |
-| pgvector | TBD | HNSW 인덱스 |
-| psycopg[binary] | TBD | Postgres 드라이버 |
-| pandas | TBD | |
-| pandas_market_calendars | TBD | NYSE calendar |
-| typer | TBD | CLI |
-| pytest + pytest-vcr | TBD | VCR 녹화/재생 |
+| anthropic | ~=0.96.0 | messages API tool_use 표준 |
+| sentence-transformers | ~=5.4.0 | MiniLM-L6-v2 384-dim |
+| pgvector | ~=0.4.0 | HNSW 인덱스 |
+| psycopg[binary] | ~=3.3.0 | Postgres 드라이버 |
+| pandas | ~=3.0.0 | Python 3.14 호환 |
+| pandas_market_calendars | ~=5.3.0 | NYSE calendar |
+| typer | ~=0.24.0 | CLI |
+| pytest | ~=9.0.0 | |
+| pytest-vcr | ~=1.0.0 | VCR 녹화/재생 |
+| yfinance | ~=1.3.0 | 가격 fixture |
+| pydantic | >=2.13,<3 | 모델 validation |
+| pyyaml | ~=6.0 | 포트폴리오 YAML |
+| requests | ~=2.33.0 | EDGAR/RSS HTTP |
 
 ## 경로 규약
 
