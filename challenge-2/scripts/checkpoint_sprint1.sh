@@ -4,8 +4,14 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
-echo "[checkpoint-1] pytest tools"
-pytest tests/test_tools_prices.py tests/test_tools_news.py tests/test_tools_rag.py -q
+# Activate project venv if present (see checkpoint_sprint0.sh rationale).
+if [ -f "$ROOT_DIR/.venv/bin/activate" ]; then
+  # shellcheck disable=SC1091
+  source "$ROOT_DIR/.venv/bin/activate"
+fi
+
+echo "[checkpoint-1] pytest tools + ingest"
+pytest tests/test_tools_prices.py tests/test_tools_news.py tests/test_tools_rag.py tests/test_ingest_filings.py -q
 
 echo "[checkpoint-1] rag_search returns results"
 python -c "
@@ -16,7 +22,7 @@ print(f'rag_search ok, top result preview: {str(results[0])[:80]}')
 "
 
 echo "[checkpoint-1] filings_chunks count >= 10"
-COUNT=$(docker-compose exec -T postgres psql -U ria -d ria -t -c "SELECT COUNT(*) FROM filings_chunks;" | tr -d ' \n')
+COUNT=$(docker compose exec -T postgres psql -U ria -d ria -t -c "SELECT COUNT(*) FROM filings_chunks;" | tr -d ' \n')
 [ "$COUNT" -ge 10 ] || { echo "filings_chunks=$COUNT < 10"; exit 1; }
 echo "    chunks=$COUNT"
 
