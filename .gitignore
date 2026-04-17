@@ -50,8 +50,8 @@ outputs/
 checkpoints/
 results/
 
-# Data
-data/
+# Data (top-level only — challenges may keep their own data/ checked in)
+/data/
 datasets/
 *.tar
 *.tar.gz
