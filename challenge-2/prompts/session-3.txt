@@ -1,0 +1,120 @@
+너는 challenge-2 Sprint 3을 수행하는 오버나이트 Claude 세션이다. 사용자는 자고 있다. 질문 금지. 모호하면 결정하고 challenge-2/TIMELINE.md에 append.
+
+## Preflight
+1. `[ -n "${ANTHROPIC_API_KEY:-}" ]` → 실패 시 `PRECHECK_FAIL` + exit 2
+2. `.half_scope` 존재 시 `SKIP` + exit 0
+
+## 필수 읽기 (전문)
+1. `CLAUDE.md`
+2. `challenge-2/PRD.md` — 특히 **Non-goals의 "P1 interrupt → v2 이월"** 확인
+3. `challenge-2/EXECUTION_PLAN.md` — "Sprint 3" 섹션
+4. `challenge-2/TECH_STACK.md`
+5. `challenge-2/TIMELINE.md` — Sprint 0~2 결과
+6. Design doc: Event Loop Semantics 섹션
+7. `challenge-2/src/ria/agent/loop.py` (Sprint 2)
+
+## 이번 세션 목표 (Sprint 3: Severity classifier + Event off-cycle loop)
+
+### v1 범위 잠금 (PRD Non-goals 일치)
+- **P0만 interrupt 리포트 생성**. P1·P2는 interrupt 생성 안 함 (v2 이월).
+- P1·P2는 `decisions` 저널에 `cycle_type='deferred_P1'` / `'deferred_P2'`로 기록만 → 다음 planned cycle의 news aggregation에 노출.
+
+### 산출물
+
+- `src/ria/tools/classify.py`:
+  - `classify_severity(event: Event, portfolio: Portfolio) -> {severity: Literal["P0","P1","P2"], rationale: str}`
+  - **Haiku 4.5** 호출. 시스템 프롬프트에 "포트폴리오 보유 종목 직접 hit → P0, 관련 섹터 macro → P1, 기타 → P2" 기준.
+  - input_token 상한 1500 (prompt + event text 제한).
+
+- `src/ria/agent/event_loop.py`:
+  - event queue drain (directory 내 `*.json` 파일들을 ts_utc 순 정렬).
+  - **Severity gate**: `severity == "P0"` 만 interrupt 리포트 생성. P1·P2는 저널에 `deferred_*` 기록.
+  - **중복 억제**: 동일 `event_id` 24h 내 재처리 금지. `event_cooldown(event_id TEXT PRIMARY KEY, last_processed_at TIMESTAMPTZ NOT NULL)` 테이블 lookup.
+  - **Clock 주입**: `now_fn: Callable[[], datetime] = datetime.utcnow` 기본값, 테스트에서 fixed datetime 주입 가능.
+  - interrupt 리포트 생성 시 Opus 호출 (interrupt system prompt 사용, `max_iterations=10`).
+
+- `src/ria/db/schema.sql`에 idempotent 추가:
+  ```sql
+  CREATE TABLE IF NOT EXISTS event_cooldown (
+    event_id TEXT PRIMARY KEY,
+    last_processed_at TIMESTAMPTZ NOT NULL
+  );
+  ```
+  Sprint 2의 schema와 충돌 없이 idempotent.
+
+- `src/ria/agent/prompts/interrupt.md` — off-cycle system prompt:
+  - planned보다 간결 (max_iterations=10)
+  - action-first (첫 문장에 action verb)
+  - **citation 최소 1개** 요구 (planned의 2개보다 완화, interrupt 속도 우선)
+
+- `src/ria/cli.py` → `ria process-events --queue <dir> --portfolio <yaml> --out <dir>` 추가. 내부에서 `event_loop.process_all()` 호출.
+
+- `tests/fixtures/synthetic_events/` — 3개 파일:
+  - `evt_tsla_earnings_miss.json` (P0 예상, interrupt 발동):
+    ```json
+    {
+      "event_id": "evt_2026_04_15_tsla_earnings_miss",
+      "ts_utc": "2026-04-15T20:00:00Z",
+      "source_type": "earnings_report",
+      "raw_text": "Tesla Q1 2026 EPS $0.32 vs consensus $0.54. Revenue $21.1B vs $22.5B. Guidance lowered for FY26 delivery growth.",
+      "expected_affected_tickers": ["TSLA"],
+      "expected_severity": "P0",
+      "ground_truth_action_hint": "review concentration if TSLA > 30% of portfolio"
+    }
+    ```
+  - `evt_random_fintwit_noise.json` (P2 예상, interrupt 억제 + deferred 저널):
+    ```json
+    {
+      "event_id": "evt_2026_04_16_fintwit_noise",
+      "ts_utc": "2026-04-16T09:30:00Z",
+      "source_type": "tweet",
+      "raw_text": "random fintwit poster says 'AI stocks going to moon next week'",
+      "expected_affected_tickers": [],
+      "expected_severity": "P2",
+      "ground_truth_action_hint": "ignore, aggregate in next planned cycle"
+    }
+    ```
+  - `evt_tsla_earnings_miss_DUP.json` (**동일 event_id** 재주입, 쿨다운으로 억제):
+    ```json
+    {
+      "event_id": "evt_2026_04_15_tsla_earnings_miss",
+      "ts_utc": "2026-04-15T22:00:00Z",
+      "source_type": "earnings_report",
+      "raw_text": "(duplicate of TSLA earnings event, different ts)",
+      "expected_affected_tickers": ["TSLA"],
+      "expected_severity": "P0",
+      "ground_truth_action_hint": "should be suppressed by cooldown"
+    }
+    ```
+
+- `tests/test_classify.py` — VCR로 Haiku 응답 결정론화, 3개 이벤트 각각 기대 severity 매칭.
+- `tests/test_event_loop.py`:
+  - P0 이벤트 → interrupt 리포트 1개 생성 + 저널 `cycle_type='interrupt_P0'`
+  - P2 이벤트 → interrupt 리포트 0개 + 저널 `cycle_type='deferred_P2'`
+  - DUP 이벤트 (clock=23h 후 재주입) → interrupt 리포트 0개 + 저널 `cycle_type='cooldown_skip'`
+  - Clock=25h 후 같은 event_id 재주입 → interrupt 리포트 생성 확인
+
+## 작업 규칙
+1. **TDD 구분**:
+   - `event_loop.py`의 severity gate / cooldown 로직 = pure Python, **unit test 먼저**
+   - `classify.py` = VCR 녹화 후 재생 (Sprint 2의 replay 패턴과 동일)
+2. **v1 범위 고정**: P0만 interrupt. 이 결정은 PRD Non-goals와 VERIFY.sh 검증에 박혀 있음. 다르게 해석하지 말 것.
+3. **Cooldown clock 주입**: production 코드는 `datetime.utcnow`, 테스트는 fixed datetime.
+4. **Report 파일명**: `reports/interrupt_P0_<YYYYMMDD>_<ticker>.md` (v1에선 severity=P0만 나옴).
+
+## 완료 조건
+```
+cd challenge-2 && bash scripts/checkpoint_sprint3.sh
+```
+P0 interrupt 1개 생성, P1/P2 interrupt 0개, DUP 이벤트는 저널 cooldown_skip 기록.
+
+## 커밋
+```
+git commit -m "feat(challenge-2): sprint 3 — severity classifier + event interrupt (P0-only v1)"
+```
+
+## 실패 시
+- 1회 실패 → TIMELINE 원인 → 재시도 (총 2)
+- 2회 실패 → `echo "HALF_SCOPE_FLAG_SPRINT_3" >> challenge-2/.half_scope` + 종료
+
+TIMELINE.md에 `sprint-3 session START` append 후 시작.

@@ -1,0 +1,75 @@
+너는 challenge-2 Sprint 2를 수행하는 오버나이트 Claude 세션이다. 사용자는 자고 있다. 질문 금지. 모호하면 결정하고 challenge-2/TIMELINE.md에 append.
+
+## Preflight
+1. `[ -n "${ANTHROPIC_API_KEY:-}" ]` → 실패 시 `PRECHECK_FAIL: no ANTHROPIC_API_KEY` + exit 2
+2. `.half_scope` 존재 시 `SKIP: upstream half_scope` + exit 0
+
+## 필수 읽기 (전문)
+1. `CLAUDE.md`
+2. `challenge-2/PRD.md`
+3. `challenge-2/EXECUTION_PLAN.md` — "Sprint 2" 섹션
+4. `challenge-2/TECH_STACK.md`
+5. `challenge-2/HARNESS.md`
+6. `challenge-2/TIMELINE.md` — Sprint 0~1 결과
+7. `challenge-2/src/ria/tools/*.py` (Sprint 1 산출)
+8. Design doc: `~/.gstack/projects/lsh1215-biweekly-ai/leesanghun-main-design-20260418-054439.md` (Approach A, Event Loop Semantics)
+
+## 이번 세션 목표 (Sprint 2: Agent loop + Weekly healthcheck)
+
+### 산출물
+
+- `src/ria/agent/loop.py`:
+  - Anthropic messages API tool-use 루프, `max_iterations=15`, Opus 4.7.
+  - **`--replay <path>` 지원 필수**: 플래그가 주어지면 Anthropic API 호출하지 않고 저장된 messages 교환을 재생. 이 플래그는 VERIFY.sh와 checkpoint_sprint2.sh에서 필수로 쓰임.
+  - Tool dispatcher: tool_use 블록을 받아 Python 함수로 라우팅 후 결과를 tool_result 블록으로 re-inject.
+
+- `src/ria/agent/prompts/planner.md` — system prompt:
+  - **한국어로 리포트 출력** 강제
+  - **citation 최소 2개** 요구 (뉴스 URL 또는 SEC accession 문자열)
+  - **첫 200자 안에 action verb** (BUY/HOLD/REDUCE/WATCH/REVIEW) 1개 이상
+  - **RAG 쿼리는 영어로** 구성 (sentence-transformers MiniLM-L6-v2는 영어 최적, 한국어 쿼리 recall 낮음)
+  - Max 500자 summary + 상세 섹션
+
+- `src/ria/tools/emit_report.py`:
+  - `emit_report(title: str, sections: list[dict], citations: list[str]) -> Path`
+  - **citations 리스트 길이 < 2이면 `ValueError` 발생** (구조적 citation 강제).
+  - Markdown 출력, 파일명: `reports/planned_<YYYYMMDD>_<ticker_summary>.md` 또는 `reports/interrupt_<severity>_<YYYYMMDD>_<ticker>.md`.
+
+- `src/ria/cli.py` (Sprint 0 스켈레톤에 확장):
+  - `ria healthcheck --portfolio <yaml> [--as-of <YYYY-MM-DD>] [--replay <path>] --out <dir>`
+  - `--as-of` **기본값**: `data/fixtures/prices/AAPL.csv`의 최대 날짜 (fixture max date). 하드코딩 금지.
+  - `--replay`: JSON 파일에 저장된 messages 교환을 재생 (API 호출 생략).
+
+- `tests/test_agent_loop.py` — **3단계 TDD**:
+  1. **Unit (mock 기반, 테스트 먼저)**: tool dispatcher와 emit_report 포맷을 모킹으로 검증. 이 단계가 **테스트 우선** 원칙을 만족.
+  2. **녹화 (라이브 1회)**: unit 단계 통과 후, 라이브 Opus 호출 1회로 `tests/fixtures/replay/healthcheck.json`에 request/response 전체 기록. 이 녹화 파일은 git에 commit.
+  3. **Replay integration**: 녹화 fixture로 end-to-end 재생해 결정론적 리포트 생성 검증.
+
+- `tests/test_emit_report.py`:
+  - citation < 2 → ValueError 확인
+  - action verb 없는 content → validation warn (emit은 성공하되 test에서 검증)
+  - 마크다운 포맷 (section heading, citations 블록) 검증
+
+## 작업 규칙
+1. **TDD 3단계 분리** (위와 같이). 녹화 단계는 unit 통과 후에만 진행 (구현 선행 오해 방지).
+2. **`--replay`는 필수 산출물**: 이 플래그가 없으면 checkpoint_sprint2가 fail. VERIFY.sh도 반드시 replay로 호출.
+3. **녹화 파일 git commit**: `tests/fixtures/replay/healthcheck.json`. 비어있으면 안 됨.
+4. **Tool use**: Opus가 호출할 tools = `get_prices`, `get_news`, `rag_search`, `emit_report`. `classify_severity`는 Sprint 3에서 추가.
+5. **결정론**: `--replay` 모드에서 같은 입력에 같은 출력 보장.
+
+## 완료 조건
+```
+cd challenge-2 && bash scripts/checkpoint_sprint2.sh
+```
+첫 200자 action verb, citation ≥ 2, replay fixture 존재.
+
+## 커밋
+```
+git commit -m "feat(challenge-2): sprint 2 — agent loop + replay mode + healthcheck"
+```
+
+## 실패 시
+- 1회 실패 → TIMELINE 원인 → 재시도 (총 2)
+- 2회 실패 → `echo "HALF_SCOPE_FLAG_SPRINT_2" >> challenge-2/.half_scope` + TIMELINE 기록 → 종료
+
+TIMELINE.md에 `sprint-2 session START` append 후 시작.

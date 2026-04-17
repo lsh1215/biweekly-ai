@@ -1,0 +1,110 @@
+너는 challenge-2 Sprint 0을 수행하는 오버나이트 Claude 세션이다. 사용자는 자고 있다. 질문·확인 요청 금지. 모호하면 자체 결정하고 challenge-2/TIMELINE.md에 ISO 타임스탬프로 "결정/이유" append.
+
+## Preflight (세션 시작 직후)
+1. `[ -n "${ANTHROPIC_API_KEY:-}" ]` 체크 → 없으면 TIMELINE에 `PRECHECK_FAIL: no ANTHROPIC_API_KEY` append + exit 2 (overnight.sh가 이를 non-retry로 처리)
+2. `docker info` 체크 → 실패 시 `PRECHECK_FAIL: docker` append + exit 2
+3. `.half_scope` 파일 존재 시 `SKIP: upstream half_scope` append + exit 0
+
+## 필수 읽기 (전문, 이 순서)
+1. `CLAUDE.md` — 불변 원칙 8개
+2. `challenge-2/PRD.md` — 문제/목표/성공기준
+3. `challenge-2/EXECUTION_PLAN.md` — 특히 "Sprint 0" 섹션
+4. `challenge-2/TECH_STACK.md` — 기술 잠금
+5. `challenge-2/HARNESS.md` — 도구/프롬프트 전략
+6. `challenge-2/TIMELINE.md` — 최신 상태
+
+## 이번 세션 목표 (Sprint 0: 스켈레톤 + Fixture + Cost probe)
+
+**경로 규약 (반드시 준수)**: 모든 상대경로는 **`challenge-2/` 루트 기준**. 파일은 전부 `challenge-2/` 아래에 생성. docker-compose, pyproject, data, reports, tests 전부 `challenge-2/` 하위.
+
+### 산출물
+
+- `pyproject.toml`:
+  - `[tool.setuptools.packages.find] where=["src"]` 설정 (src layout).
+  - 모든 import = `from ria.xxx import ...` (접두 `src.` 금지).
+  - Deps: `anthropic`, `typer`, `sentence-transformers`, `psycopg[binary]`, `pgvector`, `pandas`, `pandas_market_calendars`, `pyyaml`, `pydantic>=2`, `pytest`, `pytest-vcr`, `yfinance`.
+  - **anthropic 버전은 세션 실행 시점 pypi 최신 stable로 resolve** (`pip index versions anthropic | head -5`로 확인) 후 `~=major.minor` 고정. 같은 값을 `TECH_STACK.md`의 버전 표에도 동시 반영.
+
+- `docker-compose.yml`:
+  - Image: `pgvector/pgvector:pg16` (pgvector extension 내장)
+  - DB: `ria`, user: `ria`, password: `ria`
+  - Healthcheck: `pg_isready -U ria -d ria`
+  - Volume: 로컬 `./data/pgdata:/var/lib/postgresql/data` (gitignore)
+
+- `src/ria/models.py` — Portfolio / Position Pydantic v2 모델:
+  ```python
+  class Position(BaseModel):
+      ticker: str              # e.g. "TSLA"
+      quantity: float
+      cost_basis_usd: float
+  class Portfolio(BaseModel):
+      positions: list[Position]
+      cash_usd: float = 0.0
+      def weights(self) -> dict[str, float]: ...  # 평가액 기반 %
+  ```
+
+- `portfolio.example.yaml` — 3종목, TSLA 55% 집중 (50%+ 케이스):
+  ```yaml
+  positions:
+    - ticker: TSLA
+      quantity: 30
+      cost_basis_usd: 8400.00
+    - ticker: AAPL
+      quantity: 15
+      cost_basis_usd: 3500.00
+    - ticker: NVDA
+      quantity: 3
+      cost_basis_usd: 2100.00
+  cash_usd: 500.00
+  ```
+
+- `scripts/fetch_fixtures.py` — 1회 실행 스크립트. 세 데이터 소스:
+  - **가격** (yfinance): 상위 10 tickers = `["AAPL","MSFT","NVDA","TSLA","META","GOOGL","AMZN","AMD","AVGO","SMCI"]`. **과거 60일** OHLCV. `data/fixtures/prices/{TICKER}.csv`.
+  - **뉴스** (Yahoo Finance news RSS): `https://feeds.finance.yahoo.com/rss/2.0/headline?s={TICKER}`. 티커별 최근 30개 항목 (title, link, pub_date). `data/fixtures/news/{TICKER}.json`.
+  - **공시** (SEC EDGAR): User-Agent `"biweekly-ai/challenge-2 overnight@local"` 고정. 요청 간 `time.sleep(0.2)`. Accession ID는 다음 후보 리스트 중 접근 가능한 것 **최소 5개** 성공:
+    - AAPL 10-K: 검색 결과 `form=10-K` 최신 1개
+    - MSFT 10-K: 최신 1개
+    - NVDA 10-K: 최신 1개
+    - TSLA 10-K: 최신 1개
+    - META 10-K: 최신 1개
+    - GOOGL 10-K: 최신 1개
+    - AMZN 10-K: 최신 1개
+    - (추가 fallback) 위 기업들의 최신 10-Q, 8-K
+    접근은 EDGAR full-text search API `https://efts.sec.gov/LATEST/search-index?q=&forms=10-K&ciks={CIK}` 경유. Per-accession 3회 exponential backoff (1s, 2s, 4s). 저장: `data/fixtures/filings/{TICKER}_{FORM}_{DATE}.txt` (본문만, HTML 태그 제거).
+  - **Fallback**: 최종 5개 미달 시, 부족한 만큼 **stub 파일** 생성. 각 stub은 Claude가 직접 300자 이상의 그럴듯한 10-K 발췌 더미 텍스트를 작성해 `data/fixtures/filings/stub_{TICKER}.txt`로 저장. TIMELINE에 `FIXTURE_FALLBACK=sec_edgar_partial count=<n>` append.
+
+- `scripts/cost_probe.py` — Claude API 비용 측정:
+  - Haiku 4.5로 tiny prompt 1회 호출, input/output tokens를 Anthropic SDK `response.usage`에서 수집.
+  - 1회 호출 비용을 기반으로 **오버나이트 전체 예상 비용**을 추정 (예: Opus planned 1회 + Opus interrupt 2회 + Haiku classify 5회).
+  - **마지막 줄에 정확히 `estimated_total_usd=X.XX` 형식** (소수점 둘째자리). 예: `estimated_total_usd=12.40`. 이 포맷은 Sprint 4의 cost_summary.md 파서 계열과 맞물림.
+
+- `tests/test_fixtures.py` — fixture 로더 유닛 테스트: 빈 디렉토리, 누락 티커, 날짜 범위 밖, stub 파일 포함 케이스.
+- `tests/test_portfolio_schema.py` — YAML 파싱, `weights()` 합계 검증, 잘못된 타입 케이스.
+
+## 작업 규칙 (불변)
+1. **TDD 범위**:
+   - `src/ria/**/*.py` = **엄격 TDD** (테스트 먼저 → 실패 확인 → 구현 → 통과)
+   - `scripts/*.py` = **smoke test 1개**로 갈음 (실행 exit 0 + 부산물 파일 생성 확인)
+   - `tests/**`, `docker-compose.yml`, `pyproject.toml`, `*.yaml` = TDD 면제
+2. **패키지 레이아웃**: src layout, import는 `from ria.xxx`. 이 관례를 **모든 후속 스프린트와 checkpoint가 따른다**.
+3. **외부 네트워크**: `fetch_fixtures.py` 1회 실행만 허용. 런타임 코드는 fixture 로컬 파일만 읽음.
+4. **결정 기록**: 기술 선택이 `TECH_STACK.md`에 없으면 채택 사유를 `TIMELINE.md`에 ISO 타임스탬프로 append.
+5. **실패 시 fallback**: 위 "fetch_fixtures.py Fallback" 스펙대로. 네트워크 장애로 Sprint 0을 멈추지 말 것.
+
+## 완료 조건
+```
+cd challenge-2 && bash scripts/checkpoint_sprint0.sh
+```
+exit 0이어야 함.
+
+## 커밋 (green 확인 후 단일 커밋)
+```
+git add challenge-2/
+git commit -m "feat(challenge-2): sprint 0 — scaffold + fixtures + cost probe"
+```
+
+## 실패 시
+- 1회 실패: TIMELINE에 원인 append → 1회 재시도 (총 2 시도)
+- 2회 실패: `echo "HALF_SCOPE_FLAG_SPRINT_0" >> challenge-2/.half_scope` + TIMELINE에 `half_scope=sprint-0` append → 세션 종료
+
+TIMELINE.md에 `sprint-0 session START` append 후 시작.
