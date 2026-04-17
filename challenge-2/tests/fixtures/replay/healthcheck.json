@@ -1,0 +1,131 @@
+{
+  "_note": "Hand-authored replay fixture for Sprint 2 VERIFY. Shape matches Anthropic messages API tool-use turns. When ANTHROPIC_API_KEY is set, re-record via `python -m ria.cli healthcheck ... --record tests/fixtures/replay/healthcheck.json`. Deterministic replay executes the tool_use blocks against local fixtures + emit_report, producing a Markdown report with ≥2 citations and an action verb in the first 200 chars.",
+  "model": "claude-opus-4-7",
+  "system": "(loaded from src/ria/agent/prompts/planner.md at runtime)",
+  "user": "기준일: 2026-04-17\n포지션:\n  - TSLA: 30주, cost basis $8400.00\n  - AAPL: 15주, cost basis $3500.00\n  - NVDA: 3주, cost basis $2100.00\n현금: $500.00\n가중치: TSLA=57.9% AAPL=24.1% NVDA=14.5% CASH=3.4%\n",
+  "turns": [
+    {
+      "assistant": {
+        "id": "msg_synthetic_01",
+        "stop_reason": "tool_use",
+        "content": [
+          {
+            "type": "text",
+            "text": "주간 헬스체크를 시작합니다. 먼저 최근 5거래일 가격 데이터를 확인해 베이스라인을 잡겠습니다."
+          },
+          {
+            "type": "tool_use",
+            "id": "tu_prices_01",
+            "name": "get_prices",
+            "input": {
+              "tickers": ["AAPL", "TSLA", "NVDA"],
+              "window_days": 5
+            }
+          }
+        ]
+      }
+    },
+    {
+      "assistant": {
+        "id": "msg_synthetic_02",
+        "stop_reason": "tool_use",
+        "content": [
+          {
+            "type": "text",
+            "text": "가장 큰 비중(57.9%)인 TSLA 뉴스부터 점검합니다."
+          },
+          {
+            "type": "tool_use",
+            "id": "tu_news_01",
+            "name": "get_news",
+            "input": {
+              "ticker": "TSLA",
+              "last_n_days": 7
+            }
+          }
+        ]
+      }
+    },
+    {
+      "assistant": {
+        "id": "msg_synthetic_03",
+        "stop_reason": "tool_use",
+        "content": [
+          {
+            "type": "text",
+            "text": "NVDA 뉴스도 같이 확인합니다."
+          },
+          {
+            "type": "tool_use",
+            "id": "tu_news_02",
+            "name": "get_news",
+            "input": {
+              "ticker": "NVDA",
+              "last_n_days": 7
+            }
+          }
+        ]
+      }
+    },
+    {
+      "assistant": {
+        "id": "msg_synthetic_04",
+        "stop_reason": "tool_use",
+        "content": [
+          {
+            "type": "text",
+            "text": "데이터 수집 완료. 분석 결과 TSLA 집중도 과대이나 최근 5거래일 변동성 정상 범위, 주요 뉴스에 즉시 대응 트리거 없음. HOLD 유지 + TSLA 집중 경고를 내는 리포트를 작성합니다."
+          },
+          {
+            "type": "tool_use",
+            "id": "tu_emit_01",
+            "name": "emit_report",
+            "input": {
+              "title": "HOLD — 주간 포트폴리오 헬스체크 (AAPL/TSLA/NVDA)",
+              "ticker_summary": "aapl_tsla_nvda",
+              "sections": [
+                {
+                  "heading": "요약",
+                  "body": "HOLD 권고. 최근 5거래일 가격 변동은 정상 범위이며, 보유 종목 관련 최근 뉴스 헤드라인에서 즉시 액션이 필요한 트리거는 포착되지 않았습니다. 다만 TSLA 집중도가 57.9%로 여전히 목표 범위(≤50%)를 초과하므로 다음 사이클까지 추가 매수는 보류하고, TSLA 실적 발표(earnings) 일정이 가시권에 들어오면 REVIEW로 에스컬레이션합니다."
+                },
+                {
+                  "heading": "포지션별 스냅샷",
+                  "body": "- TSLA (30주, cost $8,400): 최근 5거래일 소폭 반등. 뉴스 플로우는 중립-긍정(‘break losing streak’)이나 실적 발표가 임박.\n- AAPL (15주, cost $3,500): 가격 안정, 최근 뉴스는 매크로 중심(유가·해협 관련), 기업 고유 이슈 없음.\n- NVDA (3주, cost $2,100): 시장 전반 강세 속 동행. 고유 리스크 이벤트 없음."
+                },
+                {
+                  "heading": "이벤트 모니터링",
+                  "body": "- TSLA: 실적 발표 시 P0 interrupt 후보. 가이던스 하향 또는 deliveries miss 발생 시 즉시 REDUCE 후보.\n- AAPL/NVDA: 현 시점 모니터만 유지."
+                },
+                {
+                  "heading": "리스크",
+                  "body": "- 집중 리스크: TSLA 단일 포지션이 포트폴리오의 57.9%. 신규 자본 배분 시 비중 축소 방향으로만 집행 권고.\n- 섹터 매크로(반도체·EV)는 P1 — 별도 interrupt 없이 다음 planned 사이클에 집계."
+                },
+                {
+                  "heading": "다음 액션",
+                  "body": "1) 다음 헬스체크까지 포지션 변경 없음 (HOLD)\n2) TSLA 실적 발표 전후 이벤트 큐 모니터링 강화\n3) 집중도 50% 복귀 시나리오는 현금 $500으로는 재배분 여유가 부족 — 당분간 HOLD 유지하되 현금 증액 기회 관찰"
+                }
+              ],
+              "citations": [
+                "https://www.fool.com/coverage/stock-market-today/2026/04/17/stock-market-today-april-17-tesla-rises-again-to-break-losing-streak/",
+                "https://finance.yahoo.com/m/2e86a733-79d1-31a8-aaf2-9bbf4acaa122/dow-jones-futures%3A-what-to-do.html",
+                "accession:0001318605-25-000001"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "assistant": {
+        "id": "msg_synthetic_05",
+        "stop_reason": "end_turn",
+        "content": [
+          {
+            "type": "text",
+            "text": "주간 헬스체크 리포트 생성 완료. 요약: HOLD 유지, TSLA 집중 경고, 실적 발표 주시."
+          }
+        ]
+      }
+    }
+  ]
+}
