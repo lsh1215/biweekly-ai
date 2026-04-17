@@ -61,3 +61,4 @@
 - 2026-04-17T21:55:30Z DECISION: checkpoint_sprint1.sh patched same as sprint0 — auto-source .venv, `docker-compose` → `docker compose`. Also added tests/test_ingest_filings.py to the pytest line since ingest unit tests belong to Sprint 1 gate.
 - 2026-04-17T21:55:30Z DECISION: rag_search Korean-query test marked xfail strict=False (documented limitation). Empirically XPASS in this corpus (NVDA has Korean-friendly substrings), but MiniLM-L6-v2 is English-first and cross-lingual relevance is not guaranteed for arbitrary Korean queries. Agent planner prompt (Sprint 2) must emit RAG queries in English.
 - 2026-04-17T21:56:00Z sprint-1 checkpoint PASS: pytest 54 passed (+1 xpassed), rag_search smoke ok, filings_chunks=686 (≥10). Ready to commit.
+- 2026-04-17T21:57:00Z sprint-1 DONE attempt=1 commit=d2c7e51
