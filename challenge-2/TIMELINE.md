@@ -51,3 +51,4 @@
 - 2026-04-17T21:46:00Z DECISION: Root .gitignore narrowed `data/` → `/data/` so challenge-*/data/fixtures/ can be committed (required by fixture-first principle PRD §8). Top-level data/ still ignored.
 - 2026-04-17T21:45:00Z sprint-0 checkpoint PASS: 23 tests green, docker compose postgres healthy, cost probe=$0.53 (fallback mode), fixtures={prices:10,news:10,filings:7 real 10-Ks}.
 - 2026-04-17T21:45:00Z DECISION: checkpoint_sprint0.sh modified — (a) auto-source .venv/bin/activate if present (needed because macOS homebrew Python 3.14 blocks global pip per PEP 668); (b) docker-compose → docker compose (v1 binary removed, v2 is `docker compose` subcommand on this host). Both changes should be propagated to checkpoints 1-4 and VERIFY.sh in Sprint 4.
+- 2026-04-17T21:46:30Z sprint-0 DONE attempt=2 commits=[9df7ee1 sprint-0 content, 0ba4495 root gitignore narrow]. Checkpoint PASS. Ready for sprint-1 cascade (per EXECUTION_PLAN: 밤 1 covers sprint 0 + 1).
