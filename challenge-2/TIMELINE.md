@@ -106,3 +106,4 @@
 - 2026-04-18T10:22:35Z DECISION: interrupt.md prompt asks for citation ≥ 1 (per session spec) but emit_report still gates ≥ 2 — kept that contract intact, replay fixture provides 2 citations. Live-mode agent will need to send ≥ 2; minor mismatch tracked, can be relaxed in Sprint 4 if needed.
 - 2026-04-18T10:22:35Z sprint-3 checkpoint PASS: 22 unit tests green, P0 interrupt report emitted (reports/interrupt_P0_20260415_TSLA.md, action verb REVIEW + 2 citations), P1/P2 interrupts absent, decisions journal has interrupt_P0=1, deferred_P2=1, cooldown_skip=1.
 - 2026-04-18T10:22:35Z sprint-3 DONE attempt=1. Committing.
+- 2026-04-18T10:22:58Z sprint-3 committed = a1d0f70. 16 files, +1334 lines. Ready for sprint-4 cascade (overnight.sh next sprint).
