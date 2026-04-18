@@ -1,5 +1,10 @@
 {
-  "_note": "Hand-authored Haiku 4.5 classifier replay (Sprint 3, no ANTHROPIC_API_KEY).",
+  "_note": "Hand-authored Haiku 4.5 classifier replay (Sprint 3, no ANTHROPIC_API_KEY). Sprint 4 added `usage` for cost-ledger accounting.",
+  "model": "claude-haiku-4-5",
   "severity": "P2",
-  "rationale": "Anonymous social-media speculation with no held ticker named, no concrete claim, no source. Pure noise — bias toward P2 per system prompt."
+  "rationale": "Anonymous social-media speculation with no held ticker named, no concrete claim, no source. Pure noise — bias toward P2 per system prompt.",
+  "usage": {
+    "input_tokens": 420,
+    "output_tokens": 58
+  }
 }

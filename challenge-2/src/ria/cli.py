@@ -9,12 +9,18 @@ Commands:
 Replay mode: when ``ANTHROPIC_API_KEY`` is unset, ``process-events`` falls
 back to ``tests/fixtures/replay/events/`` (classify + interrupt fixtures)
 so the overnight pipeline keeps running without a live key.
+
+Sprint 4 retrofit: every Anthropic call (live or replay-with-usage) feeds
+``ria.cost_tracker`` and each decision lands in ``ria.journal`` — the
+decision-journal + cost-summary are what VERIFY.sh step 10 relies on.
 """
 
 from __future__ import annotations
 
 import json
 import os
+import re
+import traceback
 from datetime import date, datetime
 from pathlib import Path
 from typing import Callable, Optional
@@ -24,6 +30,7 @@ import yaml
 
 from ria.agent.event_loop import EventLoopReport, process_all
 from ria.agent.loop import LoopResult, run_agent
+from ria import cost_tracker, journal
 from ria.fixtures import DEFAULT_FIXTURE_ROOT, load_prices
 from ria.models import Portfolio
 from ria.tools.classify import ClassifierResult, classify_severity
@@ -37,6 +44,43 @@ def _main() -> None:
     # (keeps `python -m ria.cli healthcheck ...` working; Sprint 3 will add
     # more commands — no reshape needed.)
     pass
+
+
+_ACTION_RE = re.compile(r"\b(BUY|HOLD|REDUCE|WATCH|REVIEW)\b", re.IGNORECASE)
+
+
+def _extract_action_verb(report_path: Path) -> Optional[str]:
+    """Return the first action verb in the first 200 chars of a report, uppercased."""
+    try:
+        head = report_path.read_text(encoding="utf-8")[:200]
+    except OSError:
+        return None
+    m = _ACTION_RE.search(head)
+    return m.group(1).upper() if m else None
+
+
+def _extract_citations(report_path: Path) -> list[str]:
+    """Cheap citation harvest — pulls URL lines and accession refs from the body."""
+    try:
+        text = report_path.read_text(encoding="utf-8")
+    except OSError:
+        return []
+    cites: list[str] = []
+    for line in text.splitlines():
+        if re.search(r"https?://", line) or "accession:" in line.lower():
+            cites.append(line.strip("- ").strip())
+    return cites
+
+
+def _open_journal_conn():
+    """Return (conn, ok). Never raises — DB may be absent in offline dev."""
+    try:
+        from ria.db.conn import connect, ensure_schema  # local import keeps CLI lazy
+        c = connect()
+        ensure_schema(c)
+        return c, True
+    except Exception:
+        return None, False
 
 
 _PLANNER_PROMPT_PATH = (
@@ -151,19 +195,71 @@ def healthcheck(
     user_msg = _summarize_portfolio(pf, as_of_date)
     system_prompt = _planner_system_prompt()
 
-    result: LoopResult = run_agent(
-        system_prompt,
-        user_msg,
-        replay_path=replay,
-        tools=tools,
-        record_path=record,
-    )
+    journal_conn, journal_ok = _open_journal_conn()
+    try:
+        try:
+            result: LoopResult = run_agent(
+                system_prompt,
+                user_msg,
+                replay_path=replay,
+                tools=tools,
+                record_path=record,
+            )
+        except Exception as exc:
+            if journal_ok:
+                journal.append(
+                    journal_conn,
+                    "error",
+                    action="ERROR",
+                    rationale=f"healthcheck: {exc!r}",
+                )
+            # cost summary still written below so the user sees partial spend.
+            raise
 
-    if result.report_path is None:
-        typer.echo("ERROR: agent finished without emitting a report", err=True)
-        raise typer.Exit(code=2)
-    typer.echo(f"report: {result.report_path}")
-    typer.echo(f"turns: {result.turns}, tool_calls: {len(result.tool_calls)}")
+        if result.report_path is None:
+            if journal_ok:
+                journal.append(
+                    journal_conn,
+                    "error",
+                    action="ERROR",
+                    rationale="agent finished without emit_report",
+                )
+            typer.echo("ERROR: agent finished without emitting a report", err=True)
+            raise typer.Exit(code=2)
+
+        # Cost ledger — label by report stem so VERIFY's parser pattern matches.
+        label = Path(result.report_path).stem
+        cost_tracker.record(
+            label,
+            result.model,
+            result.input_tokens,
+            result.output_tokens,
+        )
+
+        # Decision journal — planned cycle
+        if journal_ok:
+            action_verb = _extract_action_verb(result.report_path)
+            cites = _extract_citations(result.report_path)
+            first_ticker = pf.positions[0].ticker if pf.positions else None
+            journal.append(
+                journal_conn,
+                "planned",
+                ticker=first_ticker,
+                action=action_verb,
+                rationale=f"weekly healthcheck as_of={as_of_date.isoformat()}",
+                citations=cites or None,
+                report_path=result.report_path,
+            )
+
+        typer.echo(f"report: {result.report_path}")
+        typer.echo(f"turns: {result.turns}, tool_calls: {len(result.tool_calls)}")
+    finally:
+        if journal_conn is not None:
+            journal_conn.close()
+        # Always emit the summary — even on failure paths above (errors are
+        # re-raised after this finally runs). write_summary raises if total
+        # blows the $50 gate, which propagates as a non-zero exit.
+        cost_tracker.write_summary()
 
 
 _INTERRUPT_PROMPT_PATH = (
@@ -241,6 +337,19 @@ def _interrupt_agent_runner_factory(replay_dir: Path | None):
             tools=tools,
             max_iterations=INTERRUPT_MAX_ITERATIONS,
         )
+        # Cost ledger — label by interrupt report stem (if emitted); fall back
+        # to a deterministic per-event label so missing-report paths still
+        # show up in cost_summary.md.
+        if result.report_path is not None:
+            label = Path(result.report_path).stem
+        else:
+            label = f"interrupt_{classification.severity}_{event.event_id}"
+        cost_tracker.record(
+            label,
+            result.model,
+            result.input_tokens,
+            result.output_tokens,
+        )
         return result.report_path
 
     return runner
@@ -250,7 +359,14 @@ def _classify_fn_factory(replay_dir: Path | None):
     classify_replay = (replay_dir / "classify") if replay_dir is not None else None
 
     def fn(event, portfolio):
-        return classify_severity(event, portfolio, replay_dir=classify_replay)
+        result = classify_severity(event, portfolio, replay_dir=classify_replay)
+        cost_tracker.record(
+            f"classify_{event.event_id}",
+            result.model,
+            result.input_tokens,
+            result.output_tokens,
+        )
+        return result
     return fn
 
 
@@ -285,16 +401,35 @@ def process_events(
     conn = connect()
     try:
         ensure_schema(conn)
-        report: EventLoopReport = process_all(
-            queue_dir=queue,
-            portfolio=pf,
-            out_dir=out,
-            db_conn=conn,
-            classify_fn=classify_fn,
-            agent_runner=agent_runner,
-        )
+        # v1 is single-session: each `process-events` invocation starts with
+        # a fresh cooldown table. Persistent cooldown is a future daemon-mode
+        # concern — the MVP's correctness guarantee is "replay fixture in →
+        # deterministic decisions out", which requires clearing prior state.
+        # (Mirrors the Sprint-3 recovery fix in checkpoint_sprint3.sh.)
+        with conn.cursor() as cur:
+            cur.execute("TRUNCATE event_cooldown")
+        conn.commit()
+        try:
+            report: EventLoopReport = process_all(
+                queue_dir=queue,
+                portfolio=pf,
+                out_dir=out,
+                db_conn=conn,
+                classify_fn=classify_fn,
+                agent_runner=agent_runner,
+            )
+        except Exception as exc:
+            journal.append(
+                conn,
+                "error",
+                action="ERROR",
+                rationale=f"process-events: {exc!r}\n{traceback.format_exc()[:500]}",
+            )
+            raise
     finally:
         conn.close()
+        # Always flush the cost summary — this is what VERIFY.sh step 10 reads.
+        cost_tracker.write_summary()
 
     counts: dict[str, int] = {}
     for d in report.decisions:

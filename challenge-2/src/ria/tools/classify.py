@@ -64,6 +64,11 @@ P0 if a held ticker is named explicitly with a concrete factual claim."""
 class ClassifierResult:
     severity: Severity
     rationale: str
+    # Sprint 4 — token accounting. Live: from resp.usage. Replay: from the
+    # fixture's ``usage`` block if present, else zero.
+    input_tokens: int = 0
+    output_tokens: int = 0
+    model: str = MODEL
 
     def to_dict(self) -> dict[str, str]:
         return {"severity": self.severity, "rationale": self.rationale}
@@ -111,7 +116,7 @@ def parse_response_text(text: str) -> ClassifierResult:
     return ClassifierResult(severity=sev, rationale=rationale)
 
 
-def _parse_anthropic_response(resp: Any) -> ClassifierResult:
+def _parse_anthropic_response(resp: Any, *, model: str = MODEL) -> ClassifierResult:
     text = ""
     for block in resp.content:
         if getattr(block, "type", None) == "text":
@@ -119,7 +124,17 @@ def _parse_anthropic_response(resp: Any) -> ClassifierResult:
             break
     if not text:
         raise RuntimeError("Haiku response had no text block")
-    return parse_response_text(text)
+    parsed = parse_response_text(text)
+    usage = getattr(resp, "usage", None)
+    n_in = int(getattr(usage, "input_tokens", 0) or 0) if usage else 0
+    n_out = int(getattr(usage, "output_tokens", 0) or 0) if usage else 0
+    return ClassifierResult(
+        severity=parsed.severity,
+        rationale=parsed.rationale,
+        input_tokens=n_in,
+        output_tokens=n_out,
+        model=model,
+    )
 
 
 def _replay_response(event_id: str, replay_dir: Path) -> ClassifierResult:
@@ -127,9 +142,13 @@ def _replay_response(event_id: str, replay_dir: Path) -> ClassifierResult:
     if not fp.exists():
         raise FileNotFoundError(f"classify replay missing: {fp}")
     data = json.loads(fp.read_text())
+    usage = data.get("usage") or {}
     return ClassifierResult(
         severity=_coerce_severity(data["severity"]),
         rationale=str(data.get("rationale", "")).strip() or "(no rationale)",
+        input_tokens=int(usage.get("input_tokens", 0)),
+        output_tokens=int(usage.get("output_tokens", 0)),
+        model=str(data.get("model", MODEL)),
     )
 
 
@@ -157,4 +176,4 @@ def classify_severity(
         system=SYSTEM_PROMPT,
         messages=[{"role": "user", "content": user_msg}],
     )
-    return _parse_anthropic_response(resp)
+    return _parse_anthropic_response(resp, model=model)

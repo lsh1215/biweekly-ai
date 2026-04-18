@@ -16,8 +16,8 @@ CREATE INDEX IF NOT EXISTS filings_chunks_embedding_idx
     ON filings_chunks USING hnsw (embedding vector_cosine_ops);
 
 -- Sprint 3 — event off-cycle loop tables.
--- Sprint 4 will retrofit this `decisions` table with cost/token columns; the
--- shape below is the minimum needed for cycle_type filters in checkpoint-3.
+-- Sprint 4 retrofit adds ts/ticker/action/citations columns idempotently;
+-- Sprint 3's event_loop keeps its original columns (event_id/severity/report_path).
 
 CREATE TABLE IF NOT EXISTS decisions (
     id            SERIAL PRIMARY KEY,
@@ -28,6 +28,13 @@ CREATE TABLE IF NOT EXISTS decisions (
     report_path   TEXT,
     created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Sprint 4 additive columns (IF NOT EXISTS keeps the migration idempotent
+-- across reruns and between envs that started on the Sprint 3 schema).
+ALTER TABLE decisions ADD COLUMN IF NOT EXISTS ts        TIMESTAMPTZ NOT NULL DEFAULT NOW();
+ALTER TABLE decisions ADD COLUMN IF NOT EXISTS ticker    TEXT;
+ALTER TABLE decisions ADD COLUMN IF NOT EXISTS action    TEXT;
+ALTER TABLE decisions ADD COLUMN IF NOT EXISTS citations JSONB;
 
 CREATE INDEX IF NOT EXISTS decisions_cycle_type_idx ON decisions (cycle_type);
 CREATE INDEX IF NOT EXISTS decisions_event_id_idx   ON decisions (event_id);

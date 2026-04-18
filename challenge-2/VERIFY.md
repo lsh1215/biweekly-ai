@@ -2,20 +2,24 @@
 
 기상한 사용자가 **첫 5분 안에** 재현할 수 있도록 설계. 이 파일은 설명, `VERIFY.sh`는 실행.
 
+## 전제
+
+- **macOS 사용자는 overnight 실행 시 `caffeinate -di nohup bash scripts/overnight.sh &` 필수** — 노트북이 슬립으로 들어가면 `sleep 5h10m` 리밋 백오프 카운터가 멈춰 회복이 깨진다. Linux는 `systemd-inhibit --what=sleep nohup bash scripts/overnight.sh &`.
+- VERIFY.sh 실행 단계에는 `ANTHROPIC_API_KEY`가 필요 없다 — replay fixture로 결정론적으로 동작. 라이브 재녹화를 하려면 키를 설정하고 `python -m ria.cli healthcheck --record tests/fixtures/replay/healthcheck.json ...`을 실행.
+
 ## 한 줄 명령
 
 ```bash
 cd challenge-2 && bash VERIFY.sh
 ```
 
-## 전제 (사전 설정, Sprint 0에서 이미 준비됨)
+## 사전 설정 (Sprint 0에서 이미 준비됨)
 
 1. Python 3.11+
 2. Docker Desktop 또는 Docker Engine 실행 중
-3. `ANTHROPIC_API_KEY` 환경변수 설정
+3. `.venv` 활성화는 `VERIFY.sh` / checkpoint 스크립트가 자동 처리 (homebrew PEP 668)
 4. `git status`가 challenge-2 브랜치에서 클린
-5. **[overnight 실행 시] macOS는 슬립 방지**: `caffeinate -di nohup bash challenge-2/scripts/overnight.sh > challenge-2/logs/overnight.out 2>&1 &`
-6. `.half_scope` 파일 없음 (있으면 이전 실행 잔재 — 검토 후 삭제)
+5. `.half_scope` 파일 없음 (있으면 이전 실행 잔재 — 검토 후 삭제)
 
 ## VERIFY.sh가 하는 일
 

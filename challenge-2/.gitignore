@@ -13,6 +13,7 @@ reports/*.md
 reports/*.log
 reports/pip.log
 reports/cost_summary.md
+reports/cost_ledger.jsonl
 
 # Overnight PID
 .overnight.pid

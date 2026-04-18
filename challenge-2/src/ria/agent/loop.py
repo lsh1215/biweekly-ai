@@ -126,6 +126,12 @@ class LoopResult:
     replay: bool = False
     final_text: str = ""
     stop_reason: str | None = None
+    # Sprint 4 — aggregated usage across all turns. In live mode summed from
+    # resp.usage; in replay mode read from fixture-level ``usage`` block if
+    # present, else zero (no cost was actually paid).
+    input_tokens: int = 0
+    output_tokens: int = 0
+    model: str = MODEL
 
 
 # ---- tool dispatcher -------------------------------------------------------
@@ -178,6 +184,11 @@ def _run_replay(
                 tool_calls.append({"name": name, "input": args, "result": result})
                 if name == "emit_report" and isinstance(result, (str, Path)) and result:
                     report_path = Path(result)
+
+    # Fixture-level `usage` (hand-authored or live-recorded) feeds Sprint-4
+    # cost tracking. Missing → zero tokens (no charge in replay mode).
+    usage = fixture.get("usage") or {}
+    model = fixture.get("model") or MODEL
     return LoopResult(
         turns=n_turns,
         report_path=report_path,
@@ -185,6 +196,9 @@ def _run_replay(
         replay=True,
         final_text=final_text,
         stop_reason=stop_reason,
+        input_tokens=int(usage.get("input_tokens", 0)),
+        output_tokens=int(usage.get("output_tokens", 0)),
+        model=model,
     )
 
 
@@ -225,6 +239,8 @@ def _run_live(
     final_text = ""
     report_path: Path | None = None
     stop_reason: str | None = None
+    total_input_tokens = 0
+    total_output_tokens = 0
 
     for iteration in range(max_iterations):
         resp = client.messages.create(
@@ -235,6 +251,10 @@ def _run_live(
             messages=messages,
         )
         stop_reason = resp.stop_reason
+        usage = getattr(resp, "usage", None)
+        if usage is not None:
+            total_input_tokens += int(getattr(usage, "input_tokens", 0) or 0)
+            total_output_tokens += int(getattr(usage, "output_tokens", 0) or 0)
         # serialize content blocks
         content_blocks: list[dict[str, Any]] = []
         for block in resp.content:
@@ -301,6 +321,10 @@ def _run_live(
             "system": system_prompt,
             "user": user_message,
             "turns": recorded_turns,
+            "usage": {
+                "input_tokens": total_input_tokens,
+                "output_tokens": total_output_tokens,
+            },
         }
         record_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2))
 
@@ -311,6 +335,9 @@ def _run_live(
         replay=False,
         final_text=final_text,
         stop_reason=stop_reason,
+        input_tokens=total_input_tokens,
+        output_tokens=total_output_tokens,
+        model=model,
     )
 
 

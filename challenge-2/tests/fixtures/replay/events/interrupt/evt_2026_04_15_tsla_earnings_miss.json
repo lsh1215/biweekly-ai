@@ -96,5 +96,10 @@
         ]
       }
     }
-  ]
+  ],
+  "usage": {
+    "_note": "Sprint 4 — representative aggregate across interrupt agent turns.",
+    "input_tokens": 6200,
+    "output_tokens": 820
+  }
 }

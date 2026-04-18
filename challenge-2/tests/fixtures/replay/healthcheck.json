@@ -127,5 +127,10 @@
         ]
       }
     }
-  ]
+  ],
+  "usage": {
+    "_note": "Sprint 4 — representative aggregate across the 6-turn Opus tool-use loop. Gets overwritten on --record live re-recordings.",
+    "input_tokens": 14800,
+    "output_tokens": 1650
+  }
 }
