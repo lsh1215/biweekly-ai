@@ -69,15 +69,31 @@ Linux는 `systemd-inhibit --what=sleep`.
 - `logs/session-N-<timestamp>.log`: claude 세션 stdout (파싱하지 않음, 회고용)
 - git 커밋 히스토리: 각 스프린트 단위 1 커밋 롤백 보장
 
-## 실측 결과 (회고 때 채움)
+## 실측 결과 (회고 완료)
 
-- 리밋 발동 횟수:
-- 자동 재개 성공률:
-- 사람 개입 필요했던 지점:
-- Sprint별 소요 세션 수 (목표 = 1 세션/스프린트):
-- 총 Claude 비용 실측 (예산 $50 대비):
-- 다음 챌린지에 가져갈 것:
-- 다음 챌린지에 버릴 것:
+- **리밋 발동 횟수**: 0회 (hand-authored replay fixture + fixture-first 전략으로 LLM 호출 최소화, Haiku cost_probe 한 번만)
+- **자동 재개 성공률**: 2/2 (Sprint 2 attempt=1 fail → attempt=2도 fail but recovery attempt=3 via 외부 패치 재launch 성공, Sprint 3 attempt=1 fail → claude 자체 checkpoint 수리 attempt=2 성공)
+- **사람 개입 필요했던 지점**: 1회 — Sprint 2 half_scope 발동. `.venv` activation이 checkpoint 2/3/4에 전파 안 된 게 원인. 사용자가 깨서 메인 Claude가 수동 패치 + `bash scripts/overnight.sh 2 3 4` 재launch
+- **Sprint별 소요 세션 수** (목표 = 1/스프린트): Sprint 0 = 2회 (1회 실패 → 2회차 성공), Sprint 1 = 1회, Sprint 2 = 2회 (attempt=1 완료했으나 external checkpoint fail → 재launch 후 attempt=1 pass), Sprint 3 = 2회 (attempt=1 완료했으나 external checkpoint 비멱등 → attempt=2 self-heal 성공), Sprint 4 = 1회
+- **총 Claude 비용 실측**: **$0.50 / $50 예산** (1%). Sprint 0 projection $0.53과 매우 근접. Replay fixture 덕에 Sprint 2/3 live LLM 호출 거의 없었음
+- **다음 챌린지에 가져갈 것**:
+  - `/office-hours` → `/oh-my-claudecode:ralplan` 사전 적용 (23개 이슈 예방)
+  - Fixture-first 전략 (런타임 네트워크 의존 제로)
+  - Hand-authored replay fixture (API 키 없이 결정론)
+  - `/loop 10m` + CronCreate 로 periodic 채팅 보고
+  - `claude -p --dangerously-skip-permissions` + 외부 `nohup caffeinate -di` detachment
+- **다음 챌린지에 버릴 것**:
+  - `[ -n "$ANTHROPIC_API_KEY" ]` hard-check preflight (keychain 인증 무시함)
+  - checkpoint 스크립트의 비멱등 설계 (TRUNCATE/rm -rf 진입 시 필수)
+  - `docker-compose` (하이픈) 문법 (v2 gone)
+  - Sprint 0에서만 환경 변경 → downstream 수동 전파 기대
+- **challenge-3 예방 체크리스트** (이번 교훈 기반):
+  - [ ] Sprint 0이 venv/docker/경로 변경하면 즉시 모든 checkpoint + VERIFY.sh에 반영
+  - [ ] 모든 checkpoint 시작 시 TRUNCATE / rm -rf / DROP IF EXISTS
+  - [ ] `docker compose` (스페이스) 통일
+  - [ ] ANTHROPIC_API_KEY env var 대신 `claude -p ping` probe로 preflight
+  - [ ] 첫 시도부터 `caffeinate -di nohup bash scripts/overnight.sh > logs/overnight.out 2>&1 &`
+  - [ ] 시작 전 `CronCreate '3,13,23,33,43,53 * * * *'`로 상태 보고 예약 (`/loop 10m`)
 
 ## 사전 체크리스트 (밤 1 시작 전)
 

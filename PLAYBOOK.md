@@ -1,7 +1,7 @@
 # Biweekly AI Ralph-thon Playbook
 
 2주에 한 번, 2~3시간 사전 문서 작성 → 자는 동안 자율 실행 → 기상 후 검증.
-Challenge-1(VLA) 회고에서 도출된 실전 프로토콜.
+Challenge-1(VLA), Challenge-2(RIA) 회고 누적 반영.
 
 ---
 
@@ -20,18 +20,39 @@ Challenge-1(VLA) 회고에서 도출된 실전 프로토콜.
 
 ## 2. 사전 문서 템플릿 (자기 전 2~3시간)
 
+### 2.1 계획 단계 (문서 쓰기 전 ~1시간) — challenge-2에서 확정
+
+`challenge-N/` 스캐폴딩 **전에** 다음 두 스킬 순차 적용:
+
+1. **`/office-hours`** (startup mode) — PO-level forcing questions로 타깃 세그먼트·wedge·경쟁자·non-goals 확정. 설계 doc 출력 → `~/.gstack/projects/<slug>/<user>-<branch>-design-<ts>.md`.
+2. **`/oh-my-claudecode:ralplan`** — Planner + Critic adversarial 합의. 설계 doc + 초기 `EXECUTION_PLAN`에 대한 이슈 리스트 생성. Critical/Major fix를 착수 전에 반영.
+
+challenge-2에선 이 두 단계로 **23개 사전 이슈** (Critical 6 + Major 12 + Minor 5)를 overnight 진입 전에 해소. 스킵하면 overnight 중 cascade fail 위험↑.
+
+### 2.2 파일 세트
+
 `challenge-N/` 안에 다음 파일을 **반드시** 둔다:
 
 | 파일 | 역할 |
 |------|------|
 | `PRD.md` | 뭘 만드는지, 왜, 성공 기준 |
 | `EXECUTION_PLAN.md` | Sprint 0~N, 각 스프린트 목표/테스트/폴백 |
-| `TECH_STACK.md` | 사용 기술, 로컬/Docker 분담 |
+| `TECH_STACK.md` | 사용 기술, 로컬/Docker 분담, 버전 잠금 |
+| `HARNESS.md` | 도구·훅·스킬 선택, 리밋 대응, 사전 체크리스트, 실측 결과(회고 때) |
 | `VERIFY.md` | **기상 후 결과 재현 절차** (1-command 우선) |
 | `prompts/session-N.txt` | 각 세션에 Claude에 줄 프롬프트 원문 |
 | `TIMELINE.md` | 비어둠 — Claude가 실행하며 채움 |
 
 `VERIFY.md`가 제일 중요. 웹이면 URL + 시나리오, 아니면 명령어 + 기대 출력.
+
+### 2.3 사전 체크리스트 (launch 직전)
+
+- [ ] 모든 `checkpoint_sprintN.sh`가 **멱등** (진입 시 TRUNCATE/rm -rf)
+- [ ] Sprint 0 환경 변경이 Sprint 1+ checkpoint·VERIFY.sh에 **전파 완료**
+- [ ] `docker compose` (스페이스) 문법 통일
+- [ ] `ANTHROPIC_API_KEY` hard-check preflight 없음 (keychain 인증 고려)
+- [ ] macOS launch 명령: `caffeinate -di nohup bash challenge-N/scripts/overnight.sh > challenge-N/logs/overnight.out 2>&1 & disown`
+- [ ] `/loop 10m` 또는 `CronCreate '3,13,23,33,43,53 * * * *'`로 상태 보고 예약 (선택, 채팅 모니터링 원할 때)
 
 ---
 
@@ -109,12 +130,22 @@ run_session "sprint2" "$CHALLENGE_DIR/prompts/session-2.txt" 120 || exit 1
 
 ```bash
 cd challenge-N
-cat TIMELINE.md        # 뭐가 일어났는지
-cat logs/timeline.log  # 세션별 성공/실패
+[ -f .half_scope ] && cat .half_scope || echo "no half_scope ✓"   # challenge-2 추가
+tail -60 TIMELINE.md   # 뭐가 일어났는지
+git log --oneline -15  # 스프린트 단위 커밋 히스토리
 bash VERIFY.sh         # 결과물 1-command 재현
 ```
 
 `VERIFY.sh` 없으면 랄프톤 실패로 간주 (다음 회고에 기록).
+
+### 4.1 `.half_scope` 발동 시 복구
+
+challenge-2 패턴:
+1. 원인 진단 — 보통 checkpoint 스크립트 불일치 (venv, docker 문법, 멱등성)
+2. 관련 checkpoint·VERIFY.sh 패치
+3. `rm challenge-N/.half_scope`
+4. `bash scripts/overnight.sh <실패한_sprint번호>` 로 해당 스프린트부터 재launch
+5. `TIMELINE.md`에 복구 결정 append
 
 ---
 
