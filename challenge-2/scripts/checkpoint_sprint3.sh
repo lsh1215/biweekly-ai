@@ -18,6 +18,8 @@ echo "[checkpoint-3] synthetic events exist"
 
 echo "[checkpoint-3] process-events: P0 interrupt, P1/P2 suppressed (v1 scope), DUP cooldown"
 rm -rf reports/interrupt_*.md
+# Idempotency: clear cooldown so re-runs aren't fooled by prior entries.
+docker compose exec -T postgres psql -U ria -d ria -c "TRUNCATE event_cooldown;" >/dev/null
 python -m ria.cli process-events \
   --queue tests/fixtures/synthetic_events/ \
   --portfolio portfolio.example.yaml \
