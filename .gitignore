@@ -69,3 +69,9 @@ datasets/
 .omc/sessions/
 .omc/project-memory.json
 .omc/notepad.md
+
+# overnight runtime state
+.omc/
+.claude/scheduled_tasks.lock
+challenge-*/.overnight.pid
+challenge-*/.half_scope
