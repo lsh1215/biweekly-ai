@@ -7,24 +7,29 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
+# Activate project venv if present (homebrew PEP 668 blocks global pip).
+if [ -f "$SCRIPT_DIR/.venv/bin/activate" ]; then
+  # shellcheck disable=SC1091
+  source "$SCRIPT_DIR/.venv/bin/activate"
+fi
+
 log() { printf '[verify] %s\n' "$*" >&2; }
 fail() { printf '[verify] FAIL: %s\n' "$*" >&2; exit 1; }
 
-# Preflight
-[ -n "${ANTHROPIC_API_KEY:-}" ] || fail "ANTHROPIC_API_KEY not set"
-command -v docker-compose >/dev/null 2>&1 || fail "docker-compose not found"
+# Preflight — VERIFY uses replay mode, doesn't need live Anthropic auth.
+docker compose version >/dev/null 2>&1 || fail "docker compose v2 not available"
 
 # ---- 1. Cleanup
 log "[1/10] Cleaning up old containers and reports..."
-docker-compose down -v >/dev/null 2>&1 || true
+docker compose down -v >/dev/null 2>&1 || true
 rm -rf reports/
 mkdir -p reports
 
 # ---- 2. Postgres + pgvector
 log "[2/10] Starting Postgres + pgvector..."
-docker-compose up -d postgres
+docker compose up -d postgres
 for i in {1..30}; do
-  if docker-compose exec -T postgres pg_isready -U ria -d ria >/dev/null 2>&1; then
+  if docker compose exec -T postgres pg_isready -U ria -d ria >/dev/null 2>&1; then
     break
   fi
   [ "$i" -eq 30 ] && fail "Postgres not ready after 30s"
@@ -95,7 +100,7 @@ log "    action_verb=OK, planned_cites=$PLANNED_CITES, interrupt_cites=$INTERRUP
 
 # ---- 9. pgvector corpus
 log "[9/10] Checking pgvector corpus..."
-CHUNK_COUNT=$(docker-compose exec -T postgres psql -U ria -d ria -t -c "SELECT COUNT(*) FROM filings_chunks;" | tr -d ' \n')
+CHUNK_COUNT=$(docker compose exec -T postgres psql -U ria -d ria -t -c "SELECT COUNT(*) FROM filings_chunks;" | tr -d ' \n')
 [ "$CHUNK_COUNT" -ge 10 ] || fail "filings_chunks=$CHUNK_COUNT < 10"
 log "    chunks=$CHUNK_COUNT"
 

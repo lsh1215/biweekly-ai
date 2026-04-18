@@ -4,6 +4,12 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
+# Activate project venv if present (homebrew PEP 668 blocks global pip — Sprint 0 convention).
+if [ -f "$ROOT_DIR/.venv/bin/activate" ]; then
+  # shellcheck disable=SC1091
+  source "$ROOT_DIR/.venv/bin/activate"
+fi
+
 echo "[checkpoint-3] pytest classify + event_loop"
 pytest tests/test_classify.py tests/test_event_loop.py -q
 
@@ -28,7 +34,7 @@ if find reports -name 'interrupt_P2_*.md' 2>/dev/null | grep -q .; then
 fi
 
 echo "[checkpoint-3] verify cooldown suppressed DUP event in journal"
-DUP_COUNT=$(docker-compose exec -T postgres psql -U ria -d ria -t -c \
+DUP_COUNT=$(docker compose exec -T postgres psql -U ria -d ria -t -c \
   "SELECT COUNT(*) FROM decisions WHERE cycle_type='cooldown_skip';" | tr -d ' \n')
 [ "$DUP_COUNT" -ge 1 ] || { echo "no cooldown_skip journal entry (DUP event should have been suppressed)"; exit 1; }
 

@@ -4,6 +4,12 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
+# Activate project venv if present (homebrew PEP 668 blocks global pip — Sprint 0 convention).
+if [ -f "$ROOT_DIR/.venv/bin/activate" ]; then
+  # shellcheck disable=SC1091
+  source "$ROOT_DIR/.venv/bin/activate"
+fi
+
 echo "[checkpoint-2] pytest agent loop + emit_report"
 pytest tests/test_agent_loop.py tests/test_emit_report.py -q
 
