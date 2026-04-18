@@ -1,0 +1,9 @@
+{
+  "event_id": "evt_2026_04_15_tsla_earnings_miss",
+  "ts_utc": "2026-04-15T22:00:00Z",
+  "source_type": "earnings_report",
+  "raw_text": "(duplicate of TSLA earnings event, different ts)",
+  "expected_affected_tickers": ["TSLA"],
+  "expected_severity": "P0",
+  "ground_truth_action_hint": "should be suppressed by cooldown"
+}

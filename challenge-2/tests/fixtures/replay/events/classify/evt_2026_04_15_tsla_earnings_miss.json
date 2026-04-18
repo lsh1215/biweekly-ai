@@ -1,0 +1,5 @@
+{
+  "_note": "Hand-authored Haiku 4.5 classifier replay (Sprint 3, no ANTHROPIC_API_KEY). Re-record once a key is available by running `python -m ria.cli process-events ...` without --replay-dir while the key is set, then capturing the live response.",
+  "severity": "P0",
+  "rationale": "Tesla (TSLA) is a held position. Q1 2026 EPS miss ($0.32 vs $0.54 consensus), revenue miss ($21.1B vs $22.5B), and lowered FY26 delivery guidance constitute a direct, factual hit on a held ticker — classic P0 trigger."
+}

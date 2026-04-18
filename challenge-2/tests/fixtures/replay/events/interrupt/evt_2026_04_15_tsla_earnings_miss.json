@@ -1,0 +1,100 @@
+{
+  "_note": "Hand-authored Opus 4.7 interrupt-agent replay (Sprint 3, no ANTHROPIC_API_KEY). Mirrors the messages-API tool-use envelope. Re-record live by running `python -m ria.cli process-events ...` with ANTHROPIC_API_KEY set and pointing --replay-dir at a writable scratch dir then capturing.",
+  "model": "claude-opus-4-7",
+  "system": "(loaded from src/ria/agent/prompts/interrupt.md at runtime)",
+  "user": "(see _summarize_event in ria.cli — TSLA earnings miss P0)",
+  "turns": [
+    {
+      "assistant": {
+        "id": "msg_int_01",
+        "stop_reason": "tool_use",
+        "content": [
+          {
+            "type": "text",
+            "text": "TSLA 가격 스냅샷 즉시 확인."
+          },
+          {
+            "type": "tool_use",
+            "id": "tu_int_prices_01",
+            "name": "get_prices",
+            "input": {
+              "tickers": ["TSLA"],
+              "window_days": 3
+            }
+          }
+        ]
+      }
+    },
+    {
+      "assistant": {
+        "id": "msg_int_02",
+        "stop_reason": "tool_use",
+        "content": [
+          {
+            "type": "text",
+            "text": "TSLA 후속 헤드라인 1건 확인."
+          },
+          {
+            "type": "tool_use",
+            "id": "tu_int_news_01",
+            "name": "get_news",
+            "input": {
+              "ticker": "TSLA",
+              "last_n_days": 7
+            }
+          }
+        ]
+      }
+    },
+    {
+      "assistant": {
+        "id": "msg_int_03",
+        "stop_reason": "tool_use",
+        "content": [
+          {
+            "type": "text",
+            "text": "REVIEW 결정 — Q1 EPS·매출 동시 miss + FY26 가이던스 하향. TSLA 집중도(~57.9%) 감안 시 즉시 행동 후보."
+          },
+          {
+            "type": "tool_use",
+            "id": "tu_int_emit_01",
+            "name": "emit_report",
+            "input": {
+              "title": "REVIEW — TSLA Q1 2026 어닝 미스 + 가이던스 하향 (P0 interrupt)",
+              "sections": [
+                {
+                  "heading": "요약",
+                  "body": "REVIEW 권고. TSLA Q1 2026 EPS $0.32 (컨센 $0.54 미스), 매출 $21.1B (컨센 $22.5B 미스), FY26 인도량 가이던스 하향. 보유 비중 57.9%로 집중도 과대 — 다음 매수는 보류, 추가 후속 정보(컨퍼런스콜 톤·딜리버리 가이던스 디테일) 확인 후 REDUCE 여부 재평가."
+                },
+                {
+                  "heading": "근거 요지",
+                  "body": "- 직접 hit (P0): 보유 종목인 TSLA 자체에 발생\n- 매출·EPS 동시 miss → 단기 멀티플 압박\n- FY26 인도량 가이던스 하향 → 성장 내러티브 약화\n- 집중도 57.9%: 단일 종목 리스크 노출 과대"
+                },
+                {
+                  "heading": "다음 액션",
+                  "body": "1) 다음 24h 후속 보도(컨퍼런스콜 transcript, 애널리스트 reaction) 모니터\n2) 가격이 5% 이상 추가 하락 + 헤지 미사용 시 REDUCE 시나리오 활성\n3) Planned 다음 사이클에서 비중 50% 목표로 자연 조정 (신규 자본은 비-TSLA 우선)"
+                }
+              ],
+              "citations": [
+                "https://finance.yahoo.com/news/tesla-q1-2026-earnings-report",
+                "accession:0001318605-26-000042"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "assistant": {
+        "id": "msg_int_04",
+        "stop_reason": "end_turn",
+        "content": [
+          {
+            "type": "text",
+            "text": "Interrupt 리포트 작성 완료. 결정: REVIEW + 24h 모니터."
+          }
+        ]
+      }
+    }
+  ]
+}

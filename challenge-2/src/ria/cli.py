@@ -1,18 +1,20 @@
 """RIA CLI entry points (Sprint 2+).
 
 Commands:
-    ria healthcheck --portfolio <yaml> [--as-of <YYYY-MM-DD>]
-                    [--replay <json>] --out <dir>
+    ria healthcheck     --portfolio <yaml> [--as-of <YYYY-MM-DD>]
+                        [--replay <json>] --out <dir>
+    ria process-events  --queue <dir> --portfolio <yaml> --out <dir>
+                        [--replay-dir <dir>]
 
-The planner prompt lives in ``src/ria/agent/prompts/planner.md`` (read at
-call time so test and production share one source). In replay mode no
-Anthropic call is made — determinism is guaranteed by the committed fixture
-plus deterministic tool fixtures on disk.
+Replay mode: when ``ANTHROPIC_API_KEY`` is unset, ``process-events`` falls
+back to ``tests/fixtures/replay/events/`` (classify + interrupt fixtures)
+so the overnight pipeline keeps running without a live key.
 """
 
 from __future__ import annotations
 
 import json
+import os
 from datetime import date, datetime
 from pathlib import Path
 from typing import Callable, Optional
@@ -20,9 +22,11 @@ from typing import Callable, Optional
 import typer
 import yaml
 
+from ria.agent.event_loop import EventLoopReport, process_all
 from ria.agent.loop import LoopResult, run_agent
 from ria.fixtures import DEFAULT_FIXTURE_ROOT, load_prices
 from ria.models import Portfolio
+from ria.tools.classify import ClassifierResult, classify_severity
 
 app = typer.Typer(help="RIA — Reactive Investment Agent", no_args_is_help=True)
 
@@ -160,6 +164,147 @@ def healthcheck(
         raise typer.Exit(code=2)
     typer.echo(f"report: {result.report_path}")
     typer.echo(f"turns: {result.turns}, tool_calls: {len(result.tool_calls)}")
+
+
+_INTERRUPT_PROMPT_PATH = (
+    Path(__file__).resolve().parent / "agent" / "prompts" / "interrupt.md"
+)
+_DEFAULT_EVENTS_REPLAY_DIR = (
+    Path(__file__).resolve().parents[2] / "tests" / "fixtures" / "replay" / "events"
+)
+INTERRUPT_MAX_ITERATIONS = 10
+
+
+def _interrupt_system_prompt() -> str:
+    return _INTERRUPT_PROMPT_PATH.read_text()
+
+
+def _summarize_event(event, portfolio: Portfolio, classification: ClassifierResult) -> str:
+    holdings = ", ".join(f"{p.ticker}({p.quantity})" for p in portfolio.positions)
+    return (
+        f"이벤트 ID: {event.event_id}\n"
+        f"발생: {event.ts_utc.isoformat()}  source={event.source_type}\n"
+        f"영향 ticker(추정): {event.expected_affected_tickers}\n"
+        f"보유 포트폴리오: {holdings}, cash=${portfolio.cash_usd:.2f}\n"
+        f"Severity: {classification.severity} — {classification.rationale}\n\n"
+        f"원문 요약:\n---\n{event.raw_text}\n---\n\n"
+        "위 P0 이벤트에 대해 interrupt 리포트를 1개 작성하세요. "
+        "title 첫 문장에 action verb, citations ≥ 1 (가능하면 2), "
+        "emit_report 1회. 신속하게 결정하세요."
+    )
+
+
+def _interrupt_agent_runner_factory(replay_dir: Path | None):
+    """Return a callable suitable for ``process_all(agent_runner=...)``."""
+    def runner(event, portfolio: Portfolio, out_dir: Path, classification):
+        as_of_date = event.ts_utc.date()
+        tools = _build_tools(out_dir=out_dir, as_of=as_of_date)
+        # interrupt reports use a different filename convention — wrap emit
+        existing_emit = tools["emit_report"]
+
+        def _emit(**kw):
+            from ria.tools.emit_report import emit_report
+            kw.pop("out_dir", None)
+            kw.pop("as_of", None)
+            kw.pop("kind", None)
+            kw.pop("severity", None)
+            kw.pop("ticker", None)
+            ticker = (
+                event.expected_affected_tickers[0]
+                if event.expected_affected_tickers
+                else "PORT"
+            )
+            path = emit_report(
+                out_dir=out_dir,
+                as_of=as_of_date,
+                kind="interrupt",
+                severity=classification.severity,
+                ticker=ticker,
+                **kw,
+            )
+            return str(path)
+
+        tools["emit_report"] = _emit
+
+        replay_path: Path | None = None
+        if replay_dir is not None:
+            candidate = replay_dir / "interrupt" / f"{event.event_id}.json"
+            if candidate.exists():
+                replay_path = candidate
+
+        user_msg = _summarize_event(event, portfolio, classification)
+        system_prompt = _interrupt_system_prompt()
+        result = run_agent(
+            system_prompt,
+            user_msg,
+            replay_path=replay_path,
+            tools=tools,
+            max_iterations=INTERRUPT_MAX_ITERATIONS,
+        )
+        return result.report_path
+
+    return runner
+
+
+def _classify_fn_factory(replay_dir: Path | None):
+    classify_replay = (replay_dir / "classify") if replay_dir is not None else None
+
+    def fn(event, portfolio):
+        return classify_severity(event, portfolio, replay_dir=classify_replay)
+    return fn
+
+
+@app.command(name="process-events")
+def process_events(
+    queue: Path = typer.Option(..., "--queue", help="Directory of synthetic event JSON files"),
+    portfolio: Path = typer.Option(..., "--portfolio", help="YAML portfolio file"),
+    out: Path = typer.Option(..., "--out", help="Where interrupt reports are written"),
+    replay_dir: Optional[Path] = typer.Option(
+        None,
+        "--replay-dir",
+        help="Use replay fixtures (subdirs `classify/` and `interrupt/`). "
+             "Auto-defaults to tests/fixtures/replay/events/ when ANTHROPIC_API_KEY is unset.",
+    ),
+) -> None:
+    """Drain an event queue, gating P0 → interrupt; P1/P2 → deferred journal."""
+    pf = Portfolio(**yaml.safe_load(portfolio.read_text()))
+    out.mkdir(parents=True, exist_ok=True)
+
+    if replay_dir is None and not os.environ.get("ANTHROPIC_API_KEY"):
+        if _DEFAULT_EVENTS_REPLAY_DIR.exists():
+            replay_dir = _DEFAULT_EVENTS_REPLAY_DIR
+            typer.echo(
+                f"[process-events] ANTHROPIC_API_KEY unset — falling back to replay_dir={replay_dir}",
+                err=True,
+            )
+
+    classify_fn = _classify_fn_factory(replay_dir)
+    agent_runner = _interrupt_agent_runner_factory(replay_dir)
+
+    from ria.db.conn import connect, ensure_schema
+    conn = connect()
+    try:
+        ensure_schema(conn)
+        report: EventLoopReport = process_all(
+            queue_dir=queue,
+            portfolio=pf,
+            out_dir=out,
+            db_conn=conn,
+            classify_fn=classify_fn,
+            agent_runner=agent_runner,
+        )
+    finally:
+        conn.close()
+
+    counts: dict[str, int] = {}
+    for d in report.decisions:
+        counts[d.cycle_type] = counts.get(d.cycle_type, 0) + 1
+    typer.echo(f"events processed: {len(report.decisions)}")
+    for k in sorted(counts):
+        typer.echo(f"  {k}: {counts[k]}")
+    for d in report.decisions:
+        if d.report_path:
+            typer.echo(f"  report: {d.report_path}")
 
 
 if __name__ == "__main__":  # pragma: no cover

@@ -1,0 +1,9 @@
+{
+  "event_id": "evt_2026_04_16_fintwit_noise",
+  "ts_utc": "2026-04-16T09:30:00Z",
+  "source_type": "tweet",
+  "raw_text": "random fintwit poster says 'AI stocks going to moon next week'",
+  "expected_affected_tickers": [],
+  "expected_severity": "P2",
+  "ground_truth_action_hint": "ignore, aggregate in next planned cycle"
+}

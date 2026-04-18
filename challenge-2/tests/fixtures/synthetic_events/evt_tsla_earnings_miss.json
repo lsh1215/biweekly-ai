@@ -1,0 +1,9 @@
+{
+  "event_id": "evt_2026_04_15_tsla_earnings_miss",
+  "ts_utc": "2026-04-15T20:00:00Z",
+  "source_type": "earnings_report",
+  "raw_text": "Tesla Q1 2026 EPS $0.32 vs consensus $0.54. Revenue $21.1B vs $22.5B. Guidance lowered for FY26 delivery growth.",
+  "expected_affected_tickers": ["TSLA"],
+  "expected_severity": "P0",
+  "ground_truth_action_hint": "review concentration if TSLA > 30% of portfolio"
+}

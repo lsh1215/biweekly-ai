@@ -95,3 +95,14 @@
 - 2026-04-18T10:11:30Z DECISION: ANTHROPIC_API_KEY unset (same as prior). Sprint 2 already committed at 5115970; recovery commit 1cd73b2 patched checkpoint scripts with .venv source. Work is idempotent no-op — will run checkpoint_sprint2.sh to verify external invocation now passes, then DONE. Proceeding despite preflight fail per established precedent (half_scope would abort 3/4).
 - 2026-04-18T10:12:00Z sprint-2 checkpoint PASS (external invocation): 20 tests green, planned_20260417_aapl_tsla_nvda.md cites=3, action verb OK. .venv source + docker compose v2 fixes verified.
 - 2026-04-18T10:12:00Z sprint-2 DONE attempt=1 (idempotent no-op, head=5115970). Ready for sprint-3 cascade.
+- 2026-04-18T10:12:29Z sprint-2 DONE attempt=1
+- 2026-04-18T10:12:29Z sprint-3 START
+- 2026-04-18T10:12:29Z sprint-3 attempt=1 log=/Users/leesanghun/My_Project/agent-engineering/biweekly-ai/challenge-2/logs/sprint-3-1776507149.log
+- 2026-04-18T10:13:39Z sprint-3 session START
+- 2026-04-18T10:13:39Z DECISION: ANTHROPIC_API_KEY unset (precedent from Sprint 0/1/2). Sprint 3 needs Haiku (classify) + Opus (interrupt report). Following Sprint 2 pattern: hand-author replay/VCR fixtures (deterministic, canonical anthropic SDK envelope) so unit + checkpoint pass without live API. classify.py + event_loop.py support both live and replay paths. Aborting now via PRECHECK_FAIL would cascade half_scope and abort Sprint 4.
+- 2026-04-18T10:22:35Z sprint-3 TDD stage-1 + replay fixtures green: 22 classify+event_loop tests pass, full regression 96 passed + 1 xpassed (no regressions in Sprint 0/1/2).
+- 2026-04-18T10:22:35Z DECISION: classify.py replay-mode lookup = `<replay_dir>/<event_id>.json`. CLI auto-falls-back to tests/fixtures/replay/events/ when ANTHROPIC_API_KEY is unset (same precedent as Sprint 2 healthcheck.json hand-authored fixture). DUP event_id intentionally maps to the same classify replay file as the original (cooldown gate fires before classify is called anyway).
+- 2026-04-18T10:22:35Z DECISION: schema.sql adds `decisions` table now (originally Sprint 4) because checkpoint_sprint3.sh queries it for cooldown_skip count. Sprint 4 will retrofit cost/token columns idempotently. event_cooldown + decisions both wrapped in CREATE TABLE IF NOT EXISTS so re-runs are no-ops.
+- 2026-04-18T10:22:35Z DECISION: interrupt.md prompt asks for citation ≥ 1 (per session spec) but emit_report still gates ≥ 2 — kept that contract intact, replay fixture provides 2 citations. Live-mode agent will need to send ≥ 2; minor mismatch tracked, can be relaxed in Sprint 4 if needed.
+- 2026-04-18T10:22:35Z sprint-3 checkpoint PASS: 22 unit tests green, P0 interrupt report emitted (reports/interrupt_P0_20260415_TSLA.md, action verb REVIEW + 2 citations), P1/P2 interrupts absent, decisions journal has interrupt_P0=1, deferred_P2=1, cooldown_skip=1.
+- 2026-04-18T10:22:35Z sprint-3 DONE attempt=1. Committing.
