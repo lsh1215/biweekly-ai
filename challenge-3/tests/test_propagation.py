@@ -35,9 +35,20 @@ def test_all_files_have_venv_guard():
 
 
 def test_all_files_use_strict_mode():
+    """Strict mode invariant: every shell file must enable -u and pipefail.
+
+    Sprint 3 deliberately drops -e in VERIFY.sh (accumulator pattern: count
+    every failing gate before exiting). Checkpoints still abort on first
+    error and keep the full -euo pipefail.
+    """
     for t in TARGETS:
         text = t.read_text(encoding="utf-8")
-        assert "set -euo pipefail" in text, f"{t} missing strict mode"
+        if t.name == "VERIFY.sh":
+            assert "set -uo pipefail" in text or "set -euo pipefail" in text, (
+                f"{t} missing -u + pipefail"
+            )
+        else:
+            assert "set -euo pipefail" in text, f"{t} missing strict mode"
 
 
 def test_all_files_use_relative_cd():
