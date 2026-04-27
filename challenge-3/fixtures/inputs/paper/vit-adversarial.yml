@@ -1,0 +1,23 @@
+format: paper
+slug: vit-adversarial
+topic: "Adversarial robustness of vision transformers"
+core_message: "ViT 는 CNN 대비 깨끗한 이미지에선 우수하나, ε=8/255 PGD 공격에서는 ResNet-50 보다 약 12%p 더 취약하다 - patch tokenization 이 원인."
+skeleton:
+  Abstract: "ViT-B/16 vs ResNet-50, ImageNet, PGD/AutoAttack epsilon 4/8/16/255"
+  Introduction: "ViT 의 attention pattern 과 adversarial perturbation 의 상호작용"
+  Method: "동일 학습 데이터, 동일 augmentation, PGD step=20, ε in {4,8,16}/255"
+  Results: "clean: ViT 81.3%, ResNet-50 76.5%. ε=8/255 PGD: ViT 31.2%, ResNet-50 43.5%"
+  Discussion: "patch tokenization 의 receptive field 가 patch boundary 에 perturbation 을 집중시킴"
+  Limitations: "AT (adversarial training) 미적용, 단일 dataset"
+  Conclusion: "ViT 의 robustness 는 patch 설계와 직결, AT 또는 token mixing 으로 보강 필요"
+tone: "~다"
+publish_target: external
+known_facts_required:
+  - "ViT-B/16"
+  - "ResNet-50"
+  - "PGD"
+  - "8/255"
+  - "81.3%"
+  - "76.5%"
+  - "31.2%"
+  - "43.5%"

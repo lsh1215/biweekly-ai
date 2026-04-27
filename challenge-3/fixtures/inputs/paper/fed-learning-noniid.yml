@@ -1,0 +1,23 @@
+format: paper
+slug: fed-learning-noniid
+topic: "Federated learning convergence under non-IID data"
+core_message: "client drift 는 non-IID 분산 정도에 비례해 수렴을 늦추며, FedProx + cyclic client sampling 의 조합으로 IID 기준 대비 1.4x 추가 라운드만으로 수렴 가능하다."
+skeleton:
+  Abstract: "FedAvg vs FedProx vs SCAFFOLD, Dirichlet α=0.1/0.5/1.0, CIFAR-10/100"
+  Introduction: "non-IID 가 만드는 client drift 와 그 모델적 영향"
+  Method: "Dirichlet partition, 100 client, 10% sampling, 200 round 상한"
+  Results: "α=0.1 에서 FedAvg 수렴 실패 (5/10 seed), FedProx + cyclic sampling 1.4x round로 도달"
+  Discussion: "cyclic sampling 이 drift 균형 - random 대비 stale gradient 비중 감소"
+  Limitations: "communication cost 측정 부족, 단일 net 구조"
+  Conclusion: "FedProx + cyclic sampling 이 안정 baseline, communication cost 후속 연구"
+tone: "~다"
+publish_target: external
+known_facts_required:
+  - "Dirichlet"
+  - "α=0.1"
+  - "FedAvg"
+  - "FedProx"
+  - "SCAFFOLD"
+  - "100 client"
+  - "10%"
+  - "1.4x"

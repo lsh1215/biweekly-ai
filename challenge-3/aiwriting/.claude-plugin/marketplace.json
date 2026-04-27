@@ -1,0 +1,19 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "aiwriting",
+  "description": "Korean multi-format writing pipeline",
+  "owner": {
+    "name": "Sanghun Lee",
+    "email": "vitash1215@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "aiwriting",
+      "description": "writer/scrubber/copy-killer/structure-critic/fact-checker, 4 formats",
+      "version": "0.1.0",
+      "source": "./",
+      "category": "productivity"
+    }
+  ],
+  "version": "0.1.0"
+}

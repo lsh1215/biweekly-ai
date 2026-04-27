@@ -1,0 +1,21 @@
+format: paper
+slug: llm-hallucination
+topic: "Empirical study of LLM hallucination in code generation"
+core_message: "코드 생성 LLM 의 hallucination 은 질문 도메인 친숙도와 prompt context 길이의 함수로 모델링 가능하며, RAG 도입으로 약 38% 감소한다."
+skeleton:
+  Abstract: "5개 LLM x 200 코드 생성 task, hallucination rate 측정, RAG 도입 효과 비교"
+  Introduction: "코드 생성에서의 hallucination 정의 (없는 API/library 호출), 현실 영향"
+  Method: "task 분류 (web/data/system) x 5 모델 (GPT-4, Claude 3.5, ...) x 2 조건 (with/without RAG)"
+  Results: "baseline hallucination rate 19.4%, +RAG 11.9%, 도메인별 분산 큼 (system 22%, web 14%)"
+  Discussion: "RAG 가 만능 아님 - retrieval 실패 시 hallucination 오히려 증가한 케이스"
+  Limitations: "200 task = 통계적 한계, 5 모델 only, prompt 표준화 부족"
+  Conclusion: "RAG 는 평균 38% 감소 효과, 단 retrieval 신뢰도가 prerequisite"
+tone: "~다"
+publish_target: external
+known_facts_required:
+  - "5개 LLM"
+  - "200"
+  - "19.4%"
+  - "11.9%"
+  - "38%"
+  - "RAG"

@@ -1,0 +1,23 @@
+format: cover-letter
+slug: enterprise-devops-5y
+topic: "DevOps engineer @ 대기업 (5년차)"
+target_company: "대기업 IT 자회사 (예시: 삼성SDS/LG CNS 류)"
+applicant_summary: "DevOps/SRE 5년, Kubernetes + ArgoCD + Prometheus, 멀티 클러스터 운영"
+core_message: "수십 개 마이크로서비스의 배포 표준화 + 관측 표준화 경험으로, 대기업 multi-tenant 환경에서 즉시 표준 자산을 만들 수 있다."
+skeleton:
+  intro: "현재 회사 35개 마이크로서비스의 ArgoCD 표준 배포 파이프라인 설계, 배포 실패율 8% -> 0.4%"
+  experience1: "ArgoCD ApplicationSet + Kustomize overlay 패턴 - 환경별 분기를 코드로"
+  experience2: "Prometheus + Loki + Tempo 통합 관측 - 장애 평균 진단 시간 24분 -> 6분"
+  fit: "지원 회사의 multi-tenant Kubernetes 표준화에 동일 패턴 적용 가능"
+  closing: "표준화 산출물 README 일부 첨부 가능. 면접 기회 요청"
+tone: "~습니다"
+publish_target: external
+known_facts_required:
+  - "5년"
+  - "35개"
+  - "ArgoCD"
+  - "8%"
+  - "0.4%"
+  - "24분"
+  - "6분"
+  - "Prometheus"

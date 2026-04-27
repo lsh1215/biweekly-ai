@@ -1,0 +1,50 @@
+# known_facts.yml — user-supplied list of verified facts.
+# The aiwriting-fact-checker (Sprint 3) loads this file to whitelist
+# numbers, semver, dates, direct quotes, and proper nouns that the user
+# can vouch for. Anything matching the 5 hard-evidence regex patterns
+# in the draft but NOT appearing here is flagged as WARNING.
+#
+# The fact-checker is a pure regex pattern matcher; it cannot verify
+# the truth of an item, only that it appears in this user-curated list.
+
+numbers:
+  # Numeric values the user has personally measured or sourced
+  - "p99 47ms"
+  - "p99 62ms"
+  - "0.03%"
+  - "10억원"
+
+semver:
+  # Software versions the user is using (cite tool name + version)
+  - "PostgreSQL 15"
+  - "Python 3.13"
+  - "Resilience4j 2.2.0"
+  - "PEP 703"
+
+dates:
+  # Year / month / day strings the user has personally verified
+  - "2026"
+  - "2025-10"
+
+direct_quotes:
+  # Exact quoted strings, only include those the user can attribute
+  - "근거 먼저 묻기"
+
+proper_nouns:
+  # Tool, library, company, person names the user uses regularly
+  - "Kafka"
+  - "Resilience4j"
+  - "PostgreSQL"
+  - "Spring Boot"
+  - "ArgoCD"
+  - "Kubernetes"
+  - "Prometheus"
+  - "PyTorch"
+  - "HuggingFace"
+  - "Lighthouse CI"
+  - "GPT-4"
+  - "Claude 3.5"
+
+# When new facts appear in your drafts, copy them here after manually
+# verifying. Do not add unverified facts; the point of this file is
+# user accountability over what the writer agent will assume true.

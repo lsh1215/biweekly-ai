@@ -1,0 +1,14 @@
+format: letter
+slug: wedding-friend
+topic: "축하 메시지 (친구 결혼)"
+recipient: "10년차 친구, 결혼식 한 달 후 카드"
+core_message: "결혼식 날의 한 장면을 짚어 그 사람이 가진 따뜻함이 결혼 생활에서 어떻게 이어질지 짧게 전한다 - 진부한 축사 회피."
+skeleton:
+  opening: "결혼식 잘 치르시고 한 달 - 신혼 일상이 어땠을지 가벼운 인사"
+  body1: "결혼식에서 인상 깊었던 한 장면 - 신부 아버지께 직접 적은 손편지 읽을 때, 줄곧 진지하던 친구가 처음으로 흔들리던 표정"
+  body2: "그 흔들림이 친구의 본 모습이고, 그 본 모습으로 결혼 생활을 만들어 갈 거라 믿음"
+  closing: "다음 모임에 신부도 함께 - 가까운 시일 안에"
+tone: "~다"
+publish_target: personal
+known_facts_required:
+  - "10년"

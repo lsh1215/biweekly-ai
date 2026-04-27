@@ -1,0 +1,21 @@
+format: blog
+slug: resilience4j
+topic: "Resilience4j circuit breaker tuning"
+template: 1  # PAS
+core_message: "circuit breaker 의 임계값은 통계적 의미를 가져야 한다 - failure-rate-threshold + sliding-window-size 의 조합으로 결정된다."
+skeleton:
+  Problem: "외부 결제 게이트웨이 일시 장애 시 우리 서비스가 함께 죽었던 사례, p99 6.4초"
+  Analysis: "단순 timeout 만으로는 캐스케이드 차단 불가, half-open 상태와 sliding window 의 의미"
+  Action: "failureRateThreshold=50, slidingWindowSize=20, slidingWindowType=COUNT_BASED, waitDurationInOpenState=30s"
+  Result: "캐스케이드 사라짐, p99 6.4s -> 0.8s (open 상태로 fast-fail)"
+  Trade-offs: "false-open 가능성, half-open probe 의 비용, sliding-window 메모리"
+  요약: "통계 임계, 상태 전이, 검증 수치, 한계 (false-open), 짝 (bulkhead)"
+tone: "~다"
+publish_target: external
+known_facts_required:
+  - "p99 6.4초"
+  - "p99 0.8s"
+  - "failureRateThreshold=50"
+  - "slidingWindowSize=20"
+  - "COUNT_BASED"
+  - "waitDurationInOpenState=30s"

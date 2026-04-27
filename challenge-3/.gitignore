@@ -8,6 +8,10 @@ __pycache__/
 logs/*.log
 logs/overnight.out
 logs/cost_probe.txt
+logs/cost_probe.json
+logs/marker_*.txt
+logs/trace.log
+logs/sprint0.smoke.log
 fixtures/outputs/
 fixtures/dogfood/
 

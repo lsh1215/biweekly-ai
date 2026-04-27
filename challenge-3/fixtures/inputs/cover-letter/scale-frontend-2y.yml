@@ -1,0 +1,22 @@
+format: cover-letter
+slug: scale-frontend-2y
+topic: "Frontend engineer @ scale-up (2년차)"
+target_company: "scale-up (예시: 당근/리디 류 트래픽 급증 단계)"
+applicant_summary: "프론트엔드 2년차, React + TypeScript + Next.js, design system 기여"
+core_message: "design system 도입과 페이지 성능 회귀 모니터링 경험으로, scale-up 단계의 일관성 + 성능 두 축에 동시에 기여할 수 있다."
+skeleton:
+  intro: "현재 회사 design system을 신규 4개 도메인에 도입, 디자인 QA 시간 주 14h -> 4h"
+  experience1: "Token + Component 패턴 - Figma variants 와 React props 1:1 매칭"
+  experience2: "성능 회귀 모니터링 - Lighthouse CI + Web Vitals 태깅, LCP p95 회귀 5건 사전 차단"
+  fit: "지원 회사의 트래픽 급증 단계에서 design system + 성능 게이트가 즉시 효력 발휘"
+  closing: "PR 일부 + design system Storybook 링크 가능. 면접 기회 요청"
+tone: "~습니다"
+publish_target: external
+known_facts_required:
+  - "2년"
+  - "React"
+  - "Next.js"
+  - "Lighthouse CI"
+  - "주 14h"
+  - "주 4h"
+  - "LCP p95"

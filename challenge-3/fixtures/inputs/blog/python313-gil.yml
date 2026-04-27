@@ -1,0 +1,19 @@
+format: blog
+slug: python313-gil
+topic: "Python 3.13 GIL removal impact"
+template: 3  # General Article
+core_message: "Python 3.13 의 free-threaded 빌드(PEP 703)는 single-thread 성능 ~10% 손해를 받고 multi-thread CPU bound 에서 이득을 본다 - 모든 워크로드에 이득은 아니다."
+skeleton:
+  intro: "PEP 703 의 free-threaded 빌드 출시, opt-in 단계"
+  topic1: "GIL 의 역할 - reference counting 보호와 single-thread 성능 이득"
+  topic2: "free-threaded 빌드의 메커니즘 - biased reference counting, deferred reference counting"
+  topic3: "single-thread 성능 회귀 ~10%, multi-thread CPU bound 이득, C 확장 호환성 비용"
+  요약: "구조 변화 / 워크로드별 영향 / 벤치 수치 / 호환성 비용 / 3.14 안정화 시점"
+tone: "~다"
+publish_target: external
+known_facts_required:
+  - "Python 3.13"
+  - "PEP 703"
+  - "free-threaded"
+  - "10%"
+  - "biased reference counting"

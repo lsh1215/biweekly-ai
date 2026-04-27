@@ -1,0 +1,22 @@
+format: cover-letter
+slug: ai-startup-ml-new
+topic: "ML engineer @ AI startup (신입)"
+target_company: "AI startup (예시: 모달리티 통합/RAG 류)"
+applicant_summary: "신입, 학부 프로젝트 RAG 파이프라인 + 인턴 한 차례, PyTorch + HuggingFace"
+core_message: "졸업 프로젝트로 도메인 RAG 파이프라인을 만들면서 retrieval 평가까지 끝까지 한 경험을 토대로, 빠르게 production 환경에 적응할 수 있다."
+skeleton:
+  intro: "졸업 프로젝트 - 의료 가이드라인 RAG, retrieval recall@10 = 0.78 까지 튜닝"
+  experience1: "BM25 + dense retrieval 비교 실험, query rewriting 추가로 recall 0.62 -> 0.78"
+  experience2: "인턴 (3개월) - 추천 모델 A/B 테스트 파이프라인 작성, click-through 1.4% 개선"
+  fit: "지원 회사의 RAG 제품에 retrieval 평가 자산 그대로 이전 가능"
+  closing: "코드/실험 노트북은 GitHub 링크로 공개. 면접 기회 요청"
+tone: "~습니다"
+publish_target: external
+known_facts_required:
+  - "신입"
+  - "PyTorch"
+  - "HuggingFace"
+  - "recall@10"
+  - "0.78"
+  - "0.62"
+  - "1.4%"

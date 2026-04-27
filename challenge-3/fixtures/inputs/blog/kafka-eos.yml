@@ -1,0 +1,21 @@
+format: blog
+slug: kafka-eos
+topic: "Kafka exactly-once semantics"
+template: 1  # PAS
+core_message: "EOS는 producer idempotence + transactional API + read_committed 의 조합이며, 비용이 따로 든다."
+skeleton:
+  Problem: "결제 이벤트 중복 처리로 환불 두 번 발생한 사례, 일 1만 건 중 0.03% 수치"
+  Analysis: "at-least-once 만으로는 consumer 측 중복 제거가 필수이며, 그 전제에서 EOS의 의미"
+  Action: "producer idempotence(enable.idempotence) + transactional id + isolation.level=read_committed"
+  Result: "중복률 0.03% -> 0%, p99 latency 47ms -> 62ms"
+  Trade-offs: "throughput 약 15% 감소, transaction coordinator 부하"
+  요약: "구조적 본질, 메커니즘, 검증 수치, 의도적 한계, 짝(consumer 멱등)"
+tone: "~다"
+publish_target: external
+known_facts_required:
+  - "p99 47ms"
+  - "p99 62ms"
+  - "0.03%"
+  - "enable.idempotence"
+  - "isolation.level=read_committed"
+  - "transactional id"

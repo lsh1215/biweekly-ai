@@ -1,0 +1,9 @@
+{
+  "name": "aiwriting",
+  "version": "0.1.0",
+  "description": "Korean writing pipeline plugin: writer -> scrubber -> copy-killer -> critic -> fact-checker for blog/cover-letter/paper/letter.",
+  "author": {
+    "name": "Sanghun Lee",
+    "email": "vitash1215@gmail.com"
+  }
+}

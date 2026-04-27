@@ -1,0 +1,19 @@
+format: blog
+slug: postgres-upsert
+topic: "PostgreSQL UPSERT vs MERGE"
+template: 3  # General Article
+core_message: "INSERT ... ON CONFLICT 와 PostgreSQL 15+ MERGE 는 의미상 겹치지만, 다중 source 조인 여부와 RETURNING 가용성에서 갈린다."
+skeleton:
+  intro: "주문 동기화에서 동일 PK에 대한 update-or-insert 가 매일 200만 건"
+  topic1: "INSERT ... ON CONFLICT - 단일 row, RETURNING 지원, lock 동작"
+  topic2: "MERGE (PostgreSQL 15+) - 다중 source 조인, RETURNING 미지원 (PG15)"
+  topic3: "선택 기준 - source 형태, RETURNING 필요 여부, 성능 비교 (벤치 200만 건/일)"
+  요약: "두 구문의 의미 차이 / 선택 분기점 / 벤치 수치 / PG15 RETURNING 한계 / PG17에서의 변경 가능성"
+tone: "~다"
+publish_target: external
+known_facts_required:
+  - "PostgreSQL 15"
+  - "INSERT ... ON CONFLICT"
+  - "MERGE"
+  - "RETURNING"
+  - "200만 건"

@@ -1,0 +1,14 @@
+format: letter
+slug: condolence-parent
+topic: "위로 편지 (지인 부친상)"
+recipient: "회사 동료 (1년 같이 일함, 친한 사이는 아니지만 진심 전하고 싶음)"
+core_message: "장례 직후의 위로 카드 - 위로의 상투어를 피하고, 감정의 무게를 인정하면서 할 수 있는 작은 도움 하나를 구체적으로 제안한다."
+skeleton:
+  opening: "삼가 고인의 명복을 빕니다 - 짧고 단정"
+  body1: "그 공백을 메우는 말은 아무것도 없을 거라는 인정 - 위로의 말 자체가 한계 있음을 솔직히 적음"
+  body2: "복귀 후 업무 인수인계, 회의 대행, 식사 한 끼 동행 중 어느 것이든 가능 - 부담 없이 한 단어로 알려달라"
+  closing: "건강 챙기시기를"
+tone: "~습니다"
+publish_target: personal
+known_facts_required:
+  - "1년"

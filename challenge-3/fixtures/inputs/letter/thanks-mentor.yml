@@ -1,0 +1,14 @@
+format: letter
+slug: thanks-mentor
+topic: "감사 편지 (전 직장 멘토)"
+recipient: "전 직장 시니어 멘토 (3년 함께 일함)"
+core_message: "퇴사 후 새 회사에서 어려운 결정을 내릴 때, 멘토에게 배운 '근거 먼저 묻기' 한 줄이 매번 도움이 됐음을 구체적 사례로 전한다."
+skeleton:
+  opening: "근황 한 줄 - 새 회사 6개월차"
+  body1: "그때 받은 가르침 중 '왜 이 숫자가 이 자리에 있는가' 한 줄이 지금도 회의 시작 1분에 다시 쓰임"
+  body2: "구체 사례 - 신규 프로덕트 출시 결정 시 사용자 5명 인터뷰만 갖고 던졌다가, 멘토 말 떠올라 우선 정량 데이터 일주일 더 본 사건"
+  closing: "다시 만나 식사 한번 - 시간 되시는 주말 편하게"
+tone: "~습니다"
+publish_target: personal
+known_facts_required:
+  - "6개월"

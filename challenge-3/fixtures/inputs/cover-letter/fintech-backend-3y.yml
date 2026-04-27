@@ -1,0 +1,20 @@
+format: cover-letter
+slug: fintech-backend-3y
+topic: "Backend engineer @ fintech (3년차)"
+target_company: "지원 회사 (예시: 토스/카카오뱅크 류 핀테크)"
+applicant_summary: "백엔드 3년, Java/Kotlin/Spring 중심, 결제·정산 도메인 경험"
+core_message: "결제 정합성 문제를 분산 트랜잭션 + 이벤트 saga로 해결한 경험을 토대로, 핀테크 도메인에서 즉시 기여할 수 있다."
+skeleton:
+  intro: "현재 회사에서 결제 정합성 사고 0건 유지 (월 처리 10억원, 18개월) - 가장 단단한 단언"
+  experience1: "결제 saga 도입 - acks=all + transactional outbox, 데이터 손실 0"
+  experience2: "정산 배치 retry 정책 - exponential backoff + DLQ, 재시도 자동화"
+  fit: "지원 회사의 도메인(예시: 송금 정합성)에 직접 적용 가능한 경험 매칭"
+  closing: "면접 기회 요청"
+tone: "~습니다"
+publish_target: external
+known_facts_required:
+  - "3년"
+  - "월 10억원"
+  - "18개월"
+  - "saga"
+  - "outbox"

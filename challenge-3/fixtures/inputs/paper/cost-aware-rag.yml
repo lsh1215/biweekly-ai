@@ -1,0 +1,22 @@
+format: paper
+slug: cost-aware-rag
+topic: "Cost-aware retrieval-augmented generation"
+core_message: "쿼리 난이도와 token 비용의 trade-off 를 학습한 router 가 단순 RAG 대비 평균 비용을 32% 절감한다."
+skeleton:
+  Abstract: "쿼리 난이도 추정 + 모델 선택 router, 비용/정확도 Pareto frontier"
+  Introduction: "RAG 의 token 비용 - retrieval k 와 generation 모델 선택의 함수"
+  Method: "난이도 분류기 (BERT-base) + 3-tier 모델 (Haiku/Sonnet/Opus) + retrieval k 동적 조정"
+  Results: "정확도 89.2% 유지, 평균 비용 32% 감소, 어려운 쿼리에는 Opus + k=8"
+  Discussion: "router 자체가 inference cost 를 갖지만 amortize 됨"
+  Limitations: "난이도 라벨링 비용, 모델 가격 변동에 취약"
+  Conclusion: "비용-정확도 Pareto 에서 우월점 도달, 지속 모니터링 필요"
+tone: "~다"
+publish_target: external
+known_facts_required:
+  - "BERT-base"
+  - "32%"
+  - "89.2%"
+  - "Pareto"
+  - "Haiku"
+  - "Sonnet"
+  - "Opus"
