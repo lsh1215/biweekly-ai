@@ -6,9 +6,10 @@
 
 ## Challenges
 
-| # | 제목 | 설명 |
-|---|------|------|
-| [challenge-1](./challenge-1) | VLA (Vision-Language-Action) | 로봇 픽킹 에이전트 — Planner/Verifier/Task Manager + VLA 모델 통합 |
+| # | 제목 | 설명 | 상태 |
+|---|------|------|------|
+| [challenge-1](./challenge-1) | Warehouse Picker VLA | 로봇 픽킹 에이전트 — Planner/Verifier/Task Manager + SmolVLA 통합 (Claude LLM + Vision) | 완료 · 140 tests pass |
+| [challenge-2](./challenge-2) | Reactive Investment Agent (RIA) | 서학개미용 포트폴리오 관리 CLI — Opus 4.7 판단 + Haiku 4.5 severity + pgvector 공시 RAG + 이벤트 interrupt | 완료 · 116 tests pass · VERIFY 10/10 · $0.50 / $50 |
 
 ## 규칙
 
@@ -19,7 +20,8 @@
 
 ## 운영 문서
 
-- [`CLAUDE.md`](./CLAUDE.md) — Claude가 지킬 규칙 (자동 로드)
+- [`CLAUDE.md`](./CLAUDE.md) — Claude가 지킬 규칙 (자동 로드, 12개 불변 원칙)
 - [`PLAYBOOK.md`](./PLAYBOOK.md) — 오버나이트 프로토콜 상세
 - [`HARNESS.md`](./HARNESS.md) — 하네스 엔지니어링 원칙 + 도구 카탈로그
-- [`challenge-1/RETRO.md`](./challenge-1/RETRO.md) — 이전 회고
+- [`challenge-1/RETRO.md`](./challenge-1/RETRO.md) — 1차 회고 (VLA 로봇 픽킹)
+- [`challenge-2/RETRO.md`](./challenge-2/RETRO.md) — 2차 회고 (RIA, 4개 신규 원칙 도출 → CLAUDE.md §9~12 반영)
