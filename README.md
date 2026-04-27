@@ -10,6 +10,7 @@
 |---|------|------|------|
 | [challenge-1](./challenge-1) | Warehouse Picker VLA | 로봇 픽킹 에이전트 — Planner/Verifier/Task Manager + SmolVLA 통합 (Claude LLM + Vision) | 완료 · 140 tests pass |
 | [challenge-2](./challenge-2) | Reactive Investment Agent (RIA) | 서학개미용 포트폴리오 관리 CLI — Opus 4.7 판단 + Haiku 4.5 severity + pgvector 공시 RAG + 이벤트 interrupt | 완료 · 116 tests pass · VERIFY 10/10 · $0.50 / $50 |
+| [challenge-3](./challenge-3) | aiwriting Claude Code Plugin | 한국어 멀티포맷 글쓰기 플러그인 — writer/scrubber/copy-killer/structure-critic/fact-checker × blog/cover-letter/paper/letter | 진행 중 · overnight 예정 |
 
 ## 규칙
 
