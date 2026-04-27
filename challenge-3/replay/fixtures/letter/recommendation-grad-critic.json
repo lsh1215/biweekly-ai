@@ -1,0 +1,26 @@
+{
+  "model": "claude-opus-4-5",
+  "captured_at": "2026-04-27T21:22:28Z",
+  "stage": "structure-critic",
+  "request": {
+    "system": "You are an independent reviewer (aiwriting-structure-critic, model=opus). You evaluate one Korean writing draft, in one mode, in a single pass. Verdict vocabulary: APPROVE | ITERATE | REJECT (uppercase, exact). Output the verdict block under 400 words.\n\nOUTPUT (STRICT):\n## structure-critic 결과\n- mode: {mode}\n- verdict: APPROVE | ITERATE | REJECT\n- rationale: 1-3 sentences\n- action items (ITERATE only): numbered list\n\nMode for this call: letter.\n",
+    "messages": [
+      {
+        "role": "user",
+        "content": "mode: letter\nslug: recommendation-grad\ndraft begins ↓↓↓\n# 대학원 추천서\n\n저는 OOO 학생을 지난 9개월간 학부 과제와 자율 프로젝트에서 직접 지도하고 공동 작업한 경력이 있습니다. 이 추천서는 OOO 학생의 대학원 진학 지원을 위해 작성합니다.\n\nOOO 학생의 가장 큰 강점은 단순히 똑똑하다는 것이 아니라, 첫 설계가 실패한 후 가설을 다시 적어내는 능력입니다. 한 학기 동안 진행한 자율 프로젝트에서 OOO 학생은 문서 retrieval 시스템을 설계했는데, 초기 정확도는 0.41에 그쳤습니다. 이 지점에서 대부분 학생은 하이퍼파라미터를 조금 바꾸거나 포기합니다. OOO 학생은 달랐습니다. 실패 원인을 3주간 분해한 뒤 인덱싱 전략과 쿼리 확장 방식을 완전히 재설계했고, 최종적으로 정확도를 0.69까지 끌어올렸습니다. 이 과정에서 제가 본 것은 실험 노트 30페이지와 가설 수정 기록이었습니다.\n\n약점도 솔직히 말씀드리겠습니다. OOO 학생은 학기 초반 발표가 매우 빠르고 청자 추적이 약했습니다. 슬라이드 15장을 7분에 끝내고 질문을 받지 못한 적도 있었습니다. 저는 발표 리허설을 4회 요구했고, OOO 학생은 매 회차 속도를 조절하고 청중 시선을 확인하는 연습을 했습니다. 지금은 평균 수준입니다. 이 약점이 추천을 흔들지는 않습니다. 중요한 것은 OOO 학생이 피드백을 받고 고칠 수 있다는 점입니다.\n\n이런 학생이 대학원 환경에 적합한 이유는 명확합니다. 대학원 연구는 자율적 가설 수정이 핵심인 환경입니다. 지도교수는 매일 답을 주지 않습니다. OOO 학생은 이미 실패 후 재설계 사이클을 혼자 돌릴 수 있음을 증명했습니다. 정확도 0.41에서 멈추지 않고 0.69까지 끌어올린 그 과정이 대학원에서 필요한 전부입니다.\n\n필요하시면 추가 자료나 통화로 더 자세히 설명드릴 수 있습니다. OOO 학생의 입학 결정에 이 추천서가 도움이 되기를 바랍니다.\n↑↑↑ draft ends\nApply only the matching ## Mode: section plus ## Common from aiwriting-structure-critic.md. Return the verdict block."
+      }
+    ],
+    "tools": []
+  },
+  "response": {
+    "stop_reason": "end_turn",
+    "content": [
+      {
+        "type": "text",
+        "text": "## structure-critic 결과\n- **mode**: letter\n- **verdict**: APPROVE\n- **rationale**: 추천서(추천 sub-format) 구조 5섹션(소개/강점/약점/적합성/마무리) 충족. 구체적 장면 2개(retrieval 프로젝트 정확도 0.41→0.69·실험 노트 30페이지, 발표 리허설 4회) 명확히 앵커됨. 감정 형용사 과다 없음, 금지 토큰 없음, 본문 약 950자로 800-1500자 범위 내."
+      }
+    ]
+  },
+  "dispatch_key": "2209fdb1fbb20255d84c1843ab662a5fc23919d3e3f303222cb3da01e93320ff",
+  "format": "letter"
+}

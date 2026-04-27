@@ -1,0 +1,26 @@
+{
+  "model": "claude-opus-4-5",
+  "captured_at": "2026-04-27T21:23:04Z",
+  "stage": "structure-critic",
+  "request": {
+    "system": "You are an independent reviewer (aiwriting-structure-critic, model=opus). You evaluate one Korean writing draft, in one mode, in a single pass. Verdict vocabulary: APPROVE | ITERATE | REJECT (uppercase, exact). Output the verdict block under 400 words.\n\nOUTPUT (STRICT):\n## structure-critic 결과\n- mode: {mode}\n- verdict: APPROVE | ITERATE | REJECT\n- rationale: 1-3 sentences\n- action items (ITERATE only): numbered list\n\nMode for this call: letter.\n",
+    "messages": [
+      {
+        "role": "user",
+        "content": "mode: letter\nslug: thanks-mentor\ndraft begins ↓↓↓\n# 선생님께\n\n새 회사로 옮긴 지 6개월이 지났습니다. 선생님과 함께 일했던 3년이 여전히 제 업무 판단의 기준이 됩니다.\n\n선생님께서 반복해 물으셨던 '왜 이 숫자가 이 자리에 있는가' 한 줄이 지금도 매주 회의 시작 1분에 다시 쓰입니다. 지난달 신규 프로덕트 출시를 결정해야 했을 때, 사용자 5명 인터뷰만 갖고 던지려 했습니다. 그 질문이 떠올라 회의를 일주일 미뤘고, 정량 데이터를 먼저 모았습니다. 그때 인터뷰에서는 보이지 않던 이탈 패턴이 나타났습니다.\n\n시간 되시는 주말 편하게, 다시 한번 식사 자리를 가질 수 있으면 좋겠습니다.\n↑↑↑ draft ends\nApply only the matching ## Mode: section plus ## Common from aiwriting-structure-critic.md. Return the verdict block."
+      }
+    ],
+    "tools": []
+  },
+  "response": {
+    "stop_reason": "end_turn",
+    "content": [
+      {
+        "type": "text",
+        "text": "## structure-critic 결과\n- **mode**: letter\n- **verdict**: APPROVE\n- **rationale**: 수신자 호칭(선생님)이 명확하고, '왜 이 숫자가 이 자리에 있는가' 질문 + 지난달 프로덕트 출시 결정 일화라는 구체적 장면이 잘 앵커링되어 있다. 감사 편지 200-400자 범위 내(약 280자), 감정 형용사 과다 없음, 금지 토큰 없음, 요약 섹션 없음 - 모든 구조적 체크 통과."
+      }
+    ]
+  },
+  "dispatch_key": "1920cb82125422ccd011b0cbdb9308b8d3cbaa6e40810371c424bbd0f4bb2d46",
+  "format": "letter"
+}

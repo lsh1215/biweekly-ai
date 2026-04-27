@@ -1,0 +1,26 @@
+{
+  "model": "claude-opus-4-5",
+  "captured_at": "2026-04-27T21:23:36Z",
+  "stage": "structure-critic",
+  "request": {
+    "system": "You are an independent reviewer (aiwriting-structure-critic, model=opus). You evaluate one Korean writing draft, in one mode, in a single pass. Verdict vocabulary: APPROVE | ITERATE | REJECT (uppercase, exact). Output the verdict block under 400 words.\n\nOUTPUT (STRICT):\n## structure-critic 결과\n- mode: {mode}\n- verdict: APPROVE | ITERATE | REJECT\n- rationale: 1-3 sentences\n- action items (ITERATE only): numbered list\n\nMode for this call: letter.\n",
+    "messages": [
+      {
+        "role": "user",
+        "content": "mode: letter\nslug: wedding-friend\ndraft begins ↓↓↓\n# 진우에게\n\n결혼식 잘 치렀지? 벌써 한 달이 지났으니 신혼 일상이 어떤지 궁금하다.\n\n식장에서 신부 아버지께 직접 쓴 손편지를 읽을 때가 기억난다. 줄곧 진지한 표정으로 서 있던 네가 처음으로 흔들리던 그 순간 말이다. 10년 동안 봐온 네 모습 중에서도 가장 진우답다고 생각한다.\n\n그 흔들림이 네 본 모습이고, 네가 그 본 모습 그대로 결혼 생활을 만들어 갈 거라 믿는다.\n\n다음 모임엔 신부도 함께 나와. 가까운 시일 안에 보자.\n↑↑↑ draft ends\nApply only the matching ## Mode: section plus ## Common from aiwriting-structure-critic.md. Return the verdict block."
+      }
+    ],
+    "tools": []
+  },
+  "response": {
+    "stop_reason": "end_turn",
+    "content": [
+      {
+        "type": "text",
+        "text": "## structure-critic 결과\n- **mode**: letter\n- **verdict**: APPROVE\n- **rationale**: 구체적인 장면(손편지 낭독 중 흔들리던 순간)이 수신자가 즉시 떠올릴 수 있는 앵커로 작동하며, 감정 형용사 남용 없이 절제된 어조를 유지한다. 축하 편지 기준 200-400자 범위 내(약 200자)에 부합하고, 금지 토큰이나 `## 요약` 섹션 없음."
+      }
+    ]
+  },
+  "dispatch_key": "7b6abfbd672806d8e7d1d9cb142ef3567971aeada9444eecdb7aa49240568461",
+  "format": "letter"
+}

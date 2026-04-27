@@ -1,0 +1,26 @@
+{
+  "model": "claude-opus-4-5",
+  "captured_at": "2026-04-27T21:13:11Z",
+  "stage": "structure-critic",
+  "request": {
+    "system": "You are an independent reviewer (aiwriting-structure-critic, model=opus). You evaluate one Korean writing draft, in one mode, in a single pass. Verdict vocabulary: APPROVE | ITERATE | REJECT (uppercase, exact). Output the verdict block under 400 words.\n\nOUTPUT (STRICT):\n## structure-critic 결과\n- mode: {mode}\n- verdict: APPROVE | ITERATE | REJECT\n- rationale: 1-3 sentences\n- action items (ITERATE only): numbered list\n\nMode for this call: blog.\n",
+    "messages": [
+      {
+        "role": "user",
+        "content": "mode: blog\nslug: kafka-eos\ndraft begins ↓↓↓\n# Kafka Exactly-Once Semantics - 중복 제거의 구조와 비용\n\n## Problem\n\n하루 평균 1만 건의 결제 이벤트를 처리하는 시스템에서, 한 달에 평균 90건(0.03%)의 중복 환불이 발생했다. 같은 취소 이벤트를 두 번 처리해서 환불이 두 번 나가는 사고다. Kafka 의 at-least-once 보장이 원인이었다. Producer 재시도 시 broker 가 이미 받았던 메시지를 다시 저장하고, consumer 는 그것을 구분할 방법이 없다.\n\n문제는 \"중복을 막으려면 어디서 막아야 하는가\" 였다. Consumer 측에 UUID 기반 멱등 처리를 두는 것만으로는 부족한 순간이 있다. 메시지가 Kafka 내부에서 이미 중복 저장됐다면, consumer 의 멱등 로직이 실패하거나 배포 중 재시작될 때 다시 보게 된다.\n\n## Analysis\n\nKafka 의 기본 보장은 at-least-once 다. Producer 가 메시지를 보낸 뒤 ACK 를 받기 전에 네트워크 장애가 나면, 재시도한다. Broker 는 이미 받았는지 판단할 수 없어서 다시 저장한다. Consumer 는 순서대로 읽으면서 같은 메시지를 두 번 본다.\n\nExactly-Once Semantics (EOS) 는 이 중복을 producer 단에서 차단하는 메커니즘이다. 핵심은 세 가지 조합이다:\n\n1. **Producer idempotence**: producer 가 같은 메시지를 재전송해도 broker 가 sequence number 로 중복을 걸러낸다.\n2. **Transactional API**: 여러 partition 으로 나가는 메시지를 하나의 트랜잭션으로 묶어서, 전부 commit 되거나 전부 버려진다.\n3. **Consumer isolation level**: `read_committed` 로 설정하면 commit 된 메시지만 읽는다.\n\n이 조합이 없으면, producer 재시도는 여전히 중복을 만들고, consumer 는 그것을 구분할 수 없다. 반대로 이 조합이 갖춰지면, producer 가 네트워크 장애 후 재시도해도 broker 는 이미 받은 메시지를 다시 저장하지 않는다.\n\n## Action\n\n설정은 세 단계로 나뉜다.\n\n**1단계: Producer idempotence 활성화**\n\n```java\nprops.put(\"enable.idempotence\", \"true\");\n```\n\n이 설정 하나로 producer 는 내부적으로 sequence number 와 producer ID 를 붙여서 메시지를 보낸다. Broker 는 같은 producer ID + sequence number 조합이 들어오면 중복으로 판단해서 버린다.\n\n**2단계: Transactional ID 설정**\n\n```java\nprops.put(\"transactional.id\", \"payment-refund-processor\");\nproducer.initTransactions();\n\nproducer.beginTransaction();\nproducer.send(new ProducerRecord<>(\"refund-events\", key, value));\nproducer.commitTransaction();\n```\n\nTransactional ID 는 producer 를 고유하게 식별한다. 같은 ID 로 재시작한 producer 는 이전 트랜잭션 상태를 이어받아서, 실패한 트랜잭션을 abort 하거나 완료한다. 여러 partition 으로 나가는 메시지를 하나의 단위로 묶는다.\n\n**3단계: Consumer isolation level 설정**\n\n```java\nprops.put(\"isolation.level\", \"read_committed\");\n```\n\n이 설정이 없으면 consumer 는 commit 되지 않은 메시지도 읽는다. `read_committed` 로 바꾸면 transaction 이 commit 된 메시지만 읽는다. Abort 된 메시지는 건너뛴다.\n\n## Result\n\n적용 전후 수치:\n\n| Metric | 적용 전 | 적용 후 |\n|--------|---------|---------|\n| 중복 환불 비율 | 0.03% (30건/일) | 0% |\n| p99 latency | 47ms | 62ms |\n| Throughput | 10,000 msg/s | 8,500 msg/s |\n\n중복은 완전히 사라졌다. Producer 가 재시도해도 broker 가 sequence number 로 걸러내고, transaction 이 실패하면 consumer 는 그 메시지를 보지 않는다. 대신 latency 는 15ms 증가했고, throughput 은 약 15% 감소했다.\n\n## Trade-offs\n\nEOS 는 비용을 요구한다.\n\n**Latency 증가**: Transaction 이 commit 되기 전까지 consumer 는 메시지를 볼 수 없다. Transaction coordinator 와의 왕복이 추가된다. p99 가 47ms 에서 62ms 로 늘어난 이유다.\n\n**Throughput 감소**: Producer 가 batch 를 보낼 때, transaction 단위로 끊어서 보낸다. Batch 크기가 작아지면 network overhead 가 늘어난다. Throughput 이 15% 줄어든 원인이다.\n\n**Transaction coordinator 부하**: 모든 transaction 의 상태를 `__transaction_state` topic 에 저장한다. Producer 수가 많아지면 이 topic 의 부하가 늘어난다.\n\n**Consumer 측 멱등성은 여전히 필요하다**: EOS 는 Kafka 내부에서의 중복만 막는다. Consumer 가 메시지를 읽은 뒤 처리 중간에 실패하면, 재시작 후 같은 offset 부터 다시 읽는다. Application 단의 멱등 처리 (UUID 기반 중복 검사, database constraint 등) 는 별도로 필요하다.\n\n이 시스템에서는 중복 환불의 비용이 latency 15ms 증가보다 컸다. 환불 한 건당 평균 50,000원, 하루 30건이면 월 4,500만 원의 손실이다. p99 latency 62ms 는 사용자 경험에 영향을 주지 않는 범위였다. 따라서 EOS 를 선택했다.\n\n## 요약\n\n- Kafka EOS 는 producer idempotence, transactional API, consumer `read_committed` 의 조합이다.\n- Producer 재시도 시 broker 가 sequence number 로 중복을 걸러내고, transaction 실패 시 consumer 는 해당 메시지를 보지 않는다.\n- 중복률 0.03% 를 0% 로 낮췄지만, p99 latency 는 47ms 에서 62ms 로 증가하고 throughput 은 15% 감소했다.\n- Transaction coordinator 부하와 batch 크기 감소가 성능 하락의 원인이다.\n- Consumer 단의 멱등 처리는 여전히 필요하다. EOS 는 Kafka 내부 중복만 막는다.\n↑↑↑ draft ends\nApply only the matching ## Mode: section plus ## Common from aiwriting-structure-critic.md. Return the verdict block."
+      }
+    ],
+    "tools": []
+  },
+  "response": {
+    "stop_reason": "end_turn",
+    "content": [
+      {
+        "type": "text",
+        "text": "## structure-critic 결과\n- **mode**: blog\n- **verdict**: APPROVE\n- **rationale**: 모든 구조적 요건 충족. H1 단일, ## 요약 마지막 위치, 요약에 미래 시제 마커 0개. Problem → Analysis → Action → Result → Trade-offs 흐름이 Claim-Grounds-Qualifier-Rebuttal 구조를 명확히 따름. Trade-offs 섹션에서 \"Consumer 측 멱등성은 여전히 필요하다\"는 반론을 Steel-man으로 다루고, 성능 비용(latency 15ms↑, throughput 15%↓)을 정량적으로 인정하면서 비즈니스 정당화(월 4,500만 원 손실 vs 62ms latency)로 응수함. 수치 클레임(0.03%, 47ms→62ms, 8,500 msg/s)은 모두 측정 맥락이 명시됨."
+      }
+    ]
+  },
+  "dispatch_key": "40d88655f8ac3b6c3840482053666048943202d1e34fb8c3e40d8a6d82ae0eb1",
+  "format": "blog"
+}

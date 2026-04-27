@@ -1,0 +1,26 @@
+{
+  "model": "claude-opus-4-5",
+  "captured_at": "2026-04-27T21:21:58Z",
+  "stage": "structure-critic",
+  "request": {
+    "system": "You are an independent reviewer (aiwriting-structure-critic, model=opus). You evaluate one Korean writing draft, in one mode, in a single pass. Verdict vocabulary: APPROVE | ITERATE | REJECT (uppercase, exact). Output the verdict block under 400 words.\n\nOUTPUT (STRICT):\n## structure-critic 결과\n- mode: {mode}\n- verdict: APPROVE | ITERATE | REJECT\n- rationale: 1-3 sentences\n- action items (ITERATE only): numbered list\n\nMode for this call: letter.\n",
+    "messages": [
+      {
+        "role": "user",
+        "content": "mode: letter\nslug: condolence-parent\ndraft begins ↓↓↓\n# 삼가 고인의 명복을 빕니다\n\n저는 같은 팀에서 1년 동안 함께 일했던 동료로서 이 편지를 씁니다. 그 공백을 메우는 말은 아무것도 없을 거라는 것을 압니다. 위로의 말 자체가 한계를 가지고 있다는 사실을 알면서도, 조심스럽게 손을 내밉니다.\n\n복귀 후 제가 할 수 있는 작은 도움을 드리고 싶습니다. 업무 인수인계, 회의 대행, 식사 한 끼 동행 중 어느 것이든 가능합니다. 부담 없이 한 단어로 알려주십시오. 아무것도 요청하지 않으셔도 괜찮습니다.\n\n부디 건강 챙기시기를 바랍니다.\n↑↑↑ draft ends\nApply only the matching ## Mode: section plus ## Common from aiwriting-structure-critic.md. Return the verdict block."
+      }
+    ],
+    "tools": []
+  },
+  "response": {
+    "stop_reason": "end_turn",
+    "content": [
+      {
+        "type": "text",
+        "text": "## structure-critic 결과\n- **mode**: letter\n- **verdict**: REJECT\n- **rationale**: 위로 편지에 수신자가 떠올릴 수 있는 구체적 장면(concrete scene)이 없음. \"같은 팀에서 1년 동안\"은 관계 맥락이지 특정 순간이 아님. 또한 수신자를 이름이나 호칭으로 부르는 곳이 전혀 없음.\n- **structural objection**: rewrite anchored on a single specific moment the recipient would recognize (예: 함께 야근했던 밤, 점심 대화, 프로젝트 마감 때 보여준 모습 등)."
+      }
+    ]
+  },
+  "dispatch_key": "09d6465f678be9928609fd14cf23562639b4dbbf990d102b12a08e014ff9d64c",
+  "format": "letter"
+}
