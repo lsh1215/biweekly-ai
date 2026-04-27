@@ -37,3 +37,6 @@ ISO 타임스탬프로 Sprint 시작/종료/이슈/결정 append. 기상 후 사
 2026-04-28T06:35:00+09:00 sprint3 bash3.2 fix — checkpoint_sprint3.sh 가 set -euo pipefail + grep|wc 조합에서 grep no-match (exit 1) 으로 silent EXIT=1. sprint-0 패턴 ({ grep || true; } | wc -l) 이 sprint-3 stub 전환 시 누락. portability/R6 grep 양쪽에 적용.
 2026-04-28T06:40:35+09:00 sprint3 dogfood — 4 format × 1 topic = 4 라이브 sonnet writer call 완료 (~$0.26). chars: blog=1715 cover-letter=984 paper=2645 letter=461. scrubber=PASS 4/4. copy_killer.json + fact_checker.json 동반 출력.
 2026-04-28T06:42:00+09:00 sprint3 VERIFY.sh — 10 gate 모두 GREEN (portability / R6 / plugin validate / manifest schemas / copy-killer weights / structure-critic 4 mode / fact-checker 5 type / full pipeline 16 / dogfood 4 / no half_scope). set -e 대신 GATES_FAILED 누적 + 마지막 일괄 판정으로 어떤 gate가 fail 인지 즉시 가시화.
+2026-04-28T06:43:00+09:00 sprint-3 DONE commit=af4592904521b47a28e5369e63996c5c534880e0 files=14 insertions=1041
+2026-04-28T06:43:00+09:00 sprint3 DONE attempt=1 rejects=0/16 ck_blocked=0/16 fc_blocked=11/16 dogfood=4/4 tests=113 cost~=$0.56
+2026-04-28T06:43:00+09:00 OVERNIGHT_COMPLETE challenge-3 aiwriting plugin — Sprint 0/1/2/3 all DONE, VERIFY.sh 10/10 gates GREEN, dogfood 4/4 produced. 사용자 깨어난 후 fixtures/dogfood/{blog,cover-letter,paper,letter}.md 평가 필요.
