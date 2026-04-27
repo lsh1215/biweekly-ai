@@ -1,0 +1,83 @@
+너는 challenge-3의 Sprint 1 자율 실행자다. 사용자는 자고 있다. 무인 실행. 질문 금지.
+
+## 컨텍스트
+
+cwd: /Users/leesanghun/My_Project/agent-engineering/biweekly-ai/challenge-3
+
+먼저 cascade skip 체크:
+```bash
+[ -f .half_scope ] && { echo "HALF_SCOPE active: $(cat .half_scope) - sprint 1 skip"; exit 0; }
+```
+
+읽어:
+- PRD.md, EXECUTION_PLAN.md (Sprint 1 섹션)
+- ../CLAUDE.md
+- aiwriting/agents/aiwriting-writer.md (Sprint 0 stub)
+- aiwriting/skills/blog/SKILL.md (포팅된 거)
+
+## Sprint 1 미션
+
+1. **TDD 우선**: 테스트 4개 작성 (`tests/test_replay_fixture_shape.py`, `test_replay_dispatch_key.py`, `test_writer_format_branching.py`, `test_e2e_replay_writer.py`). 모두 fail 확인.
+
+2. **3 skill 추가** (`user-invocable: true` frontmatter):
+   - `aiwriting/skills/cover-letter/{SKILL.md, philosophy.md (blog/philosophy.md 복사), cover-letter-templates.md}`
+   - `aiwriting/skills/paper/{SKILL.md, philosophy.md, argumentation.md, paper-templates.md}`
+   - `aiwriting/skills/letter/{SKILL.md, letter-templates.md}`
+
+3. **Universal writer 일반화** (D1):
+   - `aiwriting/agents/aiwriting-writer.md`을 format param 분기로 확장
+   - format=blog → 5 knowledge file 로드 (philosophy/style-rules/templates/argumentation/ai-tell-rules)
+   - format=cover-letter → 2 file (philosophy/cover-letter-templates)
+   - format=paper → 3 file (philosophy/argumentation/paper-templates)
+   - format=letter → 1 file (letter-templates)
+   - 본문 ≤200 라인 예산
+
+4. **Orchestrator skill** (D9):
+   - `aiwriting/skills/aiwriting/SKILL.md` (numeric picker, 1줄 prompt)
+   - `user-invocable: true`
+   - 1) blog 2) cover-letter 3) paper 4) letter — 숫자 입력 → 직접 슬래시 redirect
+   - AI dispatch 0%
+
+5. **Replay 라이브 녹화 1회** (Sprint 1 only):
+   - `scripts/run_replay_capture.py` — 16 fixture × writer 호출 → JSON 저장 (D7 shape)
+   - 라이브 호출 = 16 × Sonnet ~$1.05 + structure-critic 16 × Opus ~$1.05 = ~$2.10
+   - **선결**: `claude -p "ping" --model haiku` **금지** (CLAUDE.md §12). 직접 첫 fixture 호출로 keychain auth 검증.
+   - **S5 시나리오 (auth fail)**: 401/keychain prompt 감지 시 `.half_scope=auth_locked` + abort
+   - **S6 시나리오 (Hangul ratio < 0.7)**: 녹화 후 grep `[가-힣]` ratio 검증, 미달 시 `.half_scope=lang_leak_<format>`
+   - 녹화 결과를 `replay/fixtures/{format}/{slug}-writer.json`에 저장
+   - structure-critic은 Sprint 2에서 녹화. Sprint 1은 writer만.
+
+6. **`scripts/recapture_replay.sh`** 생성 (사용자 수동 발동용):
+   ```bash
+   #!/bin/bash
+   # 사용자가 prompt 변경 후 명시적 재녹화 시 발동.
+   # 인자: <fixture-name> 또는 "all"
+   # overnight 자동 호출 금지 (D7).
+   ```
+
+7. **`scripts/run_replay.py`** (replay loader):
+   - dispatch_key sha256 매칭
+   - mismatch 시 `.half_scope=replay_stale_sprint<N>` (D7)
+
+8. **16 fixture × writer-replay 실행**:
+   - `fixtures/outputs/sprint1/{format}-{slug}.md` 16개 생성
+   - 각 산출물 frontmatter 통과 + Hangul ratio ≥0.7 (S6)
+
+## 종료 조건
+
+`bash scripts/checkpoint_sprint1.sh` exit 0 통과. checkpoint 내용은 EXECUTION_PLAN.md 참조 — Sprint 0가 stub만 만들었으니 Sprint 1에서 본문 채워. 통과 시:
+1. git commit `feat(challenge-3): sprint 1 — universal writer + 4 format skills + replay capture`
+2. TIMELINE.md에 `sprint-1 DONE commit=<hash>` append
+3. 정상 종료
+
+## 실패 시
+
+- 2회 재시도. 그래도 fail → `.half_scope=sprint1_<reason>`
+- S4 (API key fail): hand-authored fixture 폴백 (4 format × 1 topic = 4) + `.half_scope=api_key_fail` 부분 abort
+- TIMELINE.md 갱신
+
+## 권한
+
+`--dangerously-skip-permissions` 모드.
+
+지금 시작.

@@ -1,0 +1,18 @@
+# challenge-3 runtime artifacts
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# overnight 산출물 (재현 가능, fixture inputs는 commit)
+logs/*.log
+logs/overnight.out
+logs/cost_probe.txt
+fixtures/outputs/
+fixtures/dogfood/
+
+# half_scope flag (overnight 중에만 발생)
+.half_scope
+
+# replay fixtures는 commit (deterministic 입력)
+# replay/fixtures/ — track this

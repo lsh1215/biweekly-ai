@@ -1,0 +1,91 @@
+너는 challenge-3의 Sprint 3 자율 실행자다. 사용자는 자고 있다. 무인 실행.
+
+## 컨텍스트
+
+cwd: /Users/leesanghun/My_Project/agent-engineering/biweekly-ai/challenge-3
+
+cascade skip 체크:
+```bash
+[ -f .half_scope ] && { echo "HALF_SCOPE: $(cat .half_scope) - sprint 3 skip"; exit 0; }
+```
+
+읽어:
+- PRD.md, EXECUTION_PLAN.md (Sprint 3 섹션)
+- ../CLAUDE.md
+- aiwriting/agents/aiwriting-{writer,scrubber,copy-killer,structure-critic}.md
+- aiwriting/skills/aiwriting/SKILL.md (Sprint 1 stub)
+
+## Sprint 3 미션
+
+마지막 sprint. fact-checker + orchestrator 완성 + dogfood + VERIFY.sh.
+
+1. **TDD 우선**:
+   - `tests/test_fact_checker_patterns.py` (5 type regex 매칭 정확)
+   - `tests/test_full_pipeline_e2e.py` (16 fixture × 4 deterministic stage)
+
+2. **fact-checker agent + script** (LLM-free):
+   - `aiwriting/agents/aiwriting-fact-checker.md` — agent 본문은 "scripts/fact_checker.py 호출" 안내만
+   - `scripts/fact_checker.py <md_path> --known known_facts.yml`
+   - `scripts/fact_checker_patterns.py` — 5 type regex (PRD §3 D3)
+     - (a) 숫자: `\b\d+(\.\d+)?\b`, `\b\d+(\.\d+)?%\b`, `[\$₩€]\d+(\.\d+)?[KMB]?\b`
+     - (b) semver: `\bv?\d+\.\d+\.\d+([.-][a-z0-9]+)*\b`
+     - (c) 직접 인용: `"[^"]{8,}"`, `「[^」]{8,}」`
+     - (d) 날짜: `\b\d{4}\b`, `\b\d{4}-\d{2}\b`, `\b\d{4}-\d{2}-\d{2}\b`
+     - (e) 고유명사: yaml `proper_nouns_known: [...]` list 외
+   - yaml 외 매칭 발견 시 BLOCKED 리턴
+
+3. **orchestrator skill 완성** (D9 numeric picker):
+   - `aiwriting/skills/aiwriting/SKILL.md` 본문 채우기
+   - `user-invocable: true`
+   - 1줄 picker:
+     ```
+     어떤 글을 쓸까요?
+     1. blog  2. cover-letter  3. paper  4. letter
+     번호 입력 → 해당 직접 슬래시(/aiwriting:blog 등)로 redirect
+     ```
+   - AI dispatch 0%
+
+4. **`scripts/run_full_pipeline.py`** (16 fixture × 4 deterministic stage):
+   - writer-replay → scrubber → copy-killer → fact-checker
+   - structure-critic은 별도 replay 단위 테스트만 (D11)
+   - `fixtures/outputs/sprint3/{format}-{slug}.md` 16개
+   - `fixtures/outputs/sprint3/{format}-{slug}.report.json` 16개
+   - REJECT 0건 보장
+
+5. **`scripts/dogfood.sh`** + **dogfood 4회** (D12):
+   - 4 format × 1 topic = 4 라이브 호출 (~$0.26)
+   - `fixtures/dogfood/{blog,cover-letter,paper,letter}.md` 4개
+   - 각 format별로 fixture inputs/{format}/의 첫 토픽 사용
+   - sprint 3 마지막 단계 또는 사용자 깨어난 후 검증용
+
+6. **VERIFY.sh 완성** (Sprint 0 stub의 본문 채우기):
+   - 10 gate 검증 (VERIFY.md 참조)
+   - cold-restart 가능 (`.venv` 없으면 exit 3, 있으면 진행)
+
+7. **`scripts/validate_manifest.py`** (S1 fallback):
+   - jsonschema lib + cached schema (`schemas/marketplace.schema.json`)
+   - `claude plugin validate` 실패 시 폴백
+   - schema URL fetch 실패 시 cached 사용, 둘 다 실패 시 `.half_scope=schema_unavailable`
+
+8. **RETRO.md skeleton**:
+   - 빈 회고 자리잡기 (사용자가 깨어난 후 채움)
+   - 섹션: 진행 타임라인, 잘된 점, 문제점, 아쉬운 점, dogfood 사용자 평가
+
+## 종료 조건
+
+`bash scripts/checkpoint_sprint3.sh` exit 0 + `bash VERIFY.sh` exit 0:
+1. git commit `feat(challenge-3): sprint 3 — fact-checker + orchestrator + dogfood + VERIFY`
+2. TIMELINE.md `sprint-3 DONE commit=<hash>` + `OVERNIGHT_COMPLETE` append
+3. 정상 종료
+
+## 실패 시
+
+- 2회 재시도 → `.half_scope=sprint3_<reason>`
+- dogfood 4회 중 1회라도 fail → 부분 산출 OK (사용자 검토)
+- TIMELINE 갱신
+
+## 권한
+
+`--dangerously-skip-permissions` 모드.
+
+지금 시작.
