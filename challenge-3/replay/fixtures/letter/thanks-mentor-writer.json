@@ -1,0 +1,26 @@
+{
+  "model": "claude-sonnet-4-5",
+  "captured_at": "2026-04-27T20:40:35Z",
+  "stage": "writer",
+  "request": {
+    "system": "You are a Korean technical / professional writer. Produce a clean draft markdown file from a topic + chosen template + agreed skeleton, scoped by a `format` parameter (blog / cover-letter / paper / letter).\n\nOUTPUT FORMAT (STRICT):\n- Begin your response with `# ` (a level-1 markdown heading) on the very first line.\n- Do NOT wrap the draft in ```markdown ... ``` code fences.\n- Do NOT add any prose before the first `# ` line. No 'I will draft...', no 'Here is...'.\n- Do NOT add any commentary after the draft. End the response with the last line of the draft.\n- Code blocks INSIDE the draft are fine and should keep their fences.\n\nSTYLE RULES:\n- Apply format-specific knowledge (blog: 5 files; cover-letter: 2; paper: 3; letter: 1).\n- Write in the requested tone (~다 or ~습니다) consistently throughout.\n- DO NOT use em-dash (—, U+2014) or en-dash (–, U+2013) anywhere outside code blocks.\n  Use hyphen-minus (-) by default; or colon (:), arrow (→), or period when meaning matches.\n- DO NOT include greetings ('Hello', '안녕하세요', 'Thank you for reading').\n- DO NOT start with a thesis quote (> ...). Start with concrete content.\n- blog and paper end with a `## 요약` section (3-5 bullets; no future-tense teasers).\n- cover-letter and letter do NOT use a `## 요약` section.\n- Stay strictly in Korean: at least 70% of body characters must be Hangul (가-힣).\n- The response body length: blog ~1000-1800 chars, cover-letter ~800-1500, paper ~1500-2500, letter ~250-1500.",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Format: letter\nTopic: 감사 편지 (전 직장 멘토)\nSkeleton:\n  opening: 근황 한 줄 - 새 회사 6개월차\n  body1: 그때 받은 가르침 중 '왜 이 숫자가 이 자리에 있는가' 한 줄이 지금도 회의 시작 1분에 다시 쓰임\n  body2: 구체 사례 - 신규 프로덕트 출시 결정 시 사용자 5명 인터뷰만 갖고 던졌다가, 멘토 말 떠올라 우선 정량 데이터 일주일 더 본 사건\n  closing: 다시 만나 식사 한번 - 시간 되시는 주말 편하게\nTone: ~습니다\nKnowledge files (plugin-relative): skills/letter/letter-templates.md\nCore message: 퇴사 후 새 회사에서 어려운 결정을 내릴 때, 멘토에게 배운 '근거 먼저 묻기' 한 줄이 매번 도움이 됐음을 구체적 사례로 전한다.\nRecipient: 전 직장 시니어 멘토 (3년 함께 일함)\nRequired facts (must appear in draft): 6개월\n\nWrite the draft markdown only. Output the full markdown body starting with a single # H1 line. Stay strictly in Korean (≥ 70% Hangul characters in the body)."
+      }
+    ],
+    "tools": []
+  },
+  "response": {
+    "stop_reason": "end_turn",
+    "content": [
+      {
+        "type": "text",
+        "text": "# 선생님께\n\n새 회사로 옮긴 지 6개월이 지났습니다. 선생님과 함께 일했던 3년이 여전히 제 업무 판단의 기준이 됩니다.\n\n선생님께서 반복해 물으셨던 '왜 이 숫자가 이 자리에 있는가' 한 줄이 지금도 매주 회의 시작 1분에 다시 쓰입니다. 지난달 신규 프로덕트 출시를 결정해야 했을 때, 사용자 5명 인터뷰만 갖고 던지려 했습니다. 그 질문이 떠올라 회의를 일주일 미뤘고, 정량 데이터를 먼저 모았습니다. 그때 인터뷰에서는 보이지 않던 이탈 패턴이 나타났습니다.\n\n시간 되시는 주말 편하게, 다시 한번 식사 자리를 가질 수 있으면 좋겠습니다."
+      }
+    ]
+  },
+  "dispatch_key": "39ae0b1bb68dad08c0050088a708ecb774566056ad8c2e1f63bbedd54d80fbc8",
+  "format": "letter"
+}

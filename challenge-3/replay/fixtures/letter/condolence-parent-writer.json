@@ -1,0 +1,26 @@
+{
+  "model": "claude-sonnet-4-5",
+  "captured_at": "2026-04-27T20:58:15Z",
+  "stage": "writer",
+  "request": {
+    "system": "You are a Korean technical / professional writer. Produce a clean draft markdown file from a topic + chosen template + agreed skeleton, scoped by a `format` parameter (blog / cover-letter / paper / letter).\n\nOUTPUT FORMAT (STRICT):\n- Begin your response with `# ` (a level-1 markdown heading) on the very first line.\n- Do NOT wrap the draft in ```markdown ... ``` code fences.\n- Do NOT add any prose before the first `# ` line. No 'I will draft...', no 'Here is...'.\n- Do NOT add any commentary after the draft. End the response with the last line of the draft.\n- Code blocks INSIDE the draft are fine and should keep their fences.\n\nSTYLE RULES:\n- Apply format-specific knowledge (blog: 5 files; cover-letter: 2; paper: 3; letter: 1).\n- Write in the requested tone (~다 or ~습니다) consistently throughout.\n- DO NOT use em-dash (—, U+2014) or en-dash (–, U+2013) anywhere outside code blocks.\n  Use hyphen-minus (-) by default; or colon (:), arrow (→), or period when meaning matches.\n- DO NOT include greetings ('Hello', '안녕하세요', 'Thank you for reading').\n- DO NOT start with a thesis quote (> ...). Start with concrete content.\n- blog and paper end with a `## 요약` section (3-5 bullets; no future-tense teasers).\n- cover-letter and letter do NOT use a `## 요약` section.\n- Stay strictly in Korean: at least 70% of body characters must be Hangul (가-힣).\n- The response body length: blog ~1000-1800 chars, cover-letter ~800-1500, paper ~1500-2500, letter ~250-1500.",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Format: letter\nTopic: 위로 편지 (지인 부친상)\nSkeleton:\n  opening: 삼가 고인의 명복을 빕니다 - 짧고 단정\n  body1: 그 공백을 메우는 말은 아무것도 없을 거라는 인정 - 위로의 말 자체가 한계 있음을 솔직히 적음\n  body2: 복귀 후 업무 인수인계, 회의 대행, 식사 한 끼 동행 중 어느 것이든 가능 - 부담 없이 한 단어로 알려달라\n  closing: 건강 챙기시기를\nTone: ~습니다\nKnowledge files (plugin-relative): skills/letter/letter-templates.md\nCore message: 장례 직후의 위로 카드 - 위로의 상투어를 피하고, 감정의 무게를 인정하면서 할 수 있는 작은 도움 하나를 구체적으로 제안한다.\nRecipient: 회사 동료 (1년 같이 일함, 친한 사이는 아니지만 진심 전하고 싶음)\nRequired facts (must appear in draft): 1년\n\nWrite the draft markdown only. Output the full markdown body starting with a single # H1 line. Stay strictly in Korean (≥ 70% Hangul characters in the body)."
+      }
+    ],
+    "tools": []
+  },
+  "response": {
+    "stop_reason": "end_turn",
+    "content": [
+      {
+        "type": "text",
+        "text": "# 삼가 고인의 명복을 빕니다\n\n저는 같은 팀에서 1년 동안 함께 일했던 동료로서 이 편지를 씁니다. 그 공백을 메우는 말은 아무것도 없을 거라는 것을 압니다. 위로의 말 자체가 한계를 가지고 있다는 사실을 알면서도, 조심스럽게 손을 내밉니다.\n\n복귀 후 제가 할 수 있는 작은 도움을 드리고 싶습니다. 업무 인수인계, 회의 대행, 식사 한 끼 동행 중 어느 것이든 가능합니다. 부담 없이 한 단어로 알려주십시오. 아무것도 요청하지 않으셔도 괜찮습니다.\n\n부디 건강 챙기시기를 바랍니다."
+      }
+    ]
+  },
+  "dispatch_key": "9b460fc063b3605ddf0c895038d1c36c44b09c51491fbf48c97459aa5cfd9f2a",
+  "format": "letter"
+}

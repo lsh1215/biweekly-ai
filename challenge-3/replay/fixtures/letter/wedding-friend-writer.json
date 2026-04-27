@@ -1,0 +1,26 @@
+{
+  "model": "claude-sonnet-4-5",
+  "captured_at": "2026-04-27T21:01:15Z",
+  "stage": "writer",
+  "request": {
+    "system": "You are a Korean technical / professional writer. Produce a clean draft markdown file from a topic + chosen template + agreed skeleton, scoped by a `format` parameter (blog / cover-letter / paper / letter).\n\nOUTPUT FORMAT (STRICT):\n- Begin your response with `# ` (a level-1 markdown heading) on the very first line.\n- Do NOT wrap the draft in ```markdown ... ``` code fences.\n- Do NOT add any prose before the first `# ` line. No 'I will draft...', no 'Here is...'.\n- Do NOT add any commentary after the draft. End the response with the last line of the draft.\n- Code blocks INSIDE the draft are fine and should keep their fences.\n\nSTYLE RULES:\n- Apply format-specific knowledge (blog: 5 files; cover-letter: 2; paper: 3; letter: 1).\n- Write in the requested tone (~다 or ~습니다) consistently throughout.\n- DO NOT use em-dash (—, U+2014) or en-dash (–, U+2013) anywhere outside code blocks.\n  Use hyphen-minus (-) by default; or colon (:), arrow (→), or period when meaning matches.\n- DO NOT include greetings ('Hello', '안녕하세요', 'Thank you for reading').\n- DO NOT start with a thesis quote (> ...). Start with concrete content.\n- blog and paper end with a `## 요약` section (3-5 bullets; no future-tense teasers).\n- cover-letter and letter do NOT use a `## 요약` section.\n- Stay strictly in Korean: at least 70% of body characters must be Hangul (가-힣).\n- The response body length: blog ~1000-1800 chars, cover-letter ~800-1500, paper ~1500-2500, letter ~250-1500.",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Format: letter\nTopic: 축하 메시지 (친구 결혼)\nSkeleton:\n  opening: 결혼식 잘 치르시고 한 달 - 신혼 일상이 어땠을지 가벼운 인사\n  body1: 결혼식에서 인상 깊었던 한 장면 - 신부 아버지께 직접 적은 손편지 읽을 때, 줄곧 진지하던 친구가 처음으로 흔들리던 표정\n  body2: 그 흔들림이 친구의 본 모습이고, 그 본 모습으로 결혼 생활을 만들어 갈 거라 믿음\n  closing: 다음 모임에 신부도 함께 - 가까운 시일 안에\nTone: ~다\nKnowledge files (plugin-relative): skills/letter/letter-templates.md\nCore message: 결혼식 날의 한 장면을 짚어 그 사람이 가진 따뜻함이 결혼 생활에서 어떻게 이어질지 짧게 전한다 - 진부한 축사 회피.\nRecipient: 10년차 친구, 결혼식 한 달 후 카드\nRequired facts (must appear in draft): 10년\n\nWrite the draft markdown only. Output the full markdown body starting with a single # H1 line. Stay strictly in Korean (≥ 70% Hangul characters in the body)."
+      }
+    ],
+    "tools": []
+  },
+  "response": {
+    "stop_reason": "end_turn",
+    "content": [
+      {
+        "type": "text",
+        "text": "# 진우에게\n\n결혼식 잘 치렀지? 벌써 한 달이 지났으니 신혼 일상이 어떤지 궁금하다.\n\n식장에서 신부 아버지께 직접 쓴 손편지를 읽을 때가 기억난다. 줄곧 진지한 표정으로 서 있던 네가 처음으로 흔들리던 그 순간 말이다. 10년 동안 봐온 네 모습 중에서도 가장 진우답다고 생각한다.\n\n그 흔들림이 네 본 모습이고, 네가 그 본 모습 그대로 결혼 생활을 만들어 갈 거라 믿는다.\n\n다음 모임엔 신부도 함께 나와. 가까운 시일 안에 보자."
+      }
+    ]
+  },
+  "dispatch_key": "79e34d040969da89397d7a3b064d69c42bb0192999b457782b507789b3a246ce",
+  "format": "letter"
+}

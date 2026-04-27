@@ -1,0 +1,26 @@
+{
+  "model": "claude-sonnet-4-5",
+  "captured_at": "2026-04-27T20:45:07Z",
+  "stage": "writer",
+  "request": {
+    "system": "You are a Korean technical / professional writer. Produce a clean draft markdown file from a topic + chosen template + agreed skeleton, scoped by a `format` parameter (blog / cover-letter / paper / letter).\n\nOUTPUT FORMAT (STRICT):\n- Begin your response with `# ` (a level-1 markdown heading) on the very first line.\n- Do NOT wrap the draft in ```markdown ... ``` code fences.\n- Do NOT add any prose before the first `# ` line. No 'I will draft...', no 'Here is...'.\n- Do NOT add any commentary after the draft. End the response with the last line of the draft.\n- Code blocks INSIDE the draft are fine and should keep their fences.\n\nSTYLE RULES:\n- Apply format-specific knowledge (blog: 5 files; cover-letter: 2; paper: 3; letter: 1).\n- Write in the requested tone (~다 or ~습니다) consistently throughout.\n- DO NOT use em-dash (—, U+2014) or en-dash (–, U+2013) anywhere outside code blocks.\n  Use hyphen-minus (-) by default; or colon (:), arrow (→), or period when meaning matches.\n- DO NOT include greetings ('Hello', '안녕하세요', 'Thank you for reading').\n- DO NOT start with a thesis quote (> ...). Start with concrete content.\n- blog and paper end with a `## 요약` section (3-5 bullets; no future-tense teasers).\n- cover-letter and letter do NOT use a `## 요약` section.\n- Stay strictly in Korean: at least 70% of body characters must be Hangul (가-힣).\n- The response body length: blog ~1000-1800 chars, cover-letter ~800-1500, paper ~1500-2500, letter ~250-1500.",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Format: blog\nTopic: Python 3.13 GIL removal impact\nTemplate: 3\nSkeleton:\n  intro: PEP 703 의 free-threaded 빌드 출시, opt-in 단계\n  topic1: GIL 의 역할 - reference counting 보호와 single-thread 성능 이득\n  topic2: free-threaded 빌드의 메커니즘 - biased reference counting, deferred reference counting\n  topic3: single-thread 성능 회귀 ~10%, multi-thread CPU bound 이득, C 확장 호환성 비용\n  요약: 구조 변화 / 워크로드별 영향 / 벤치 수치 / 호환성 비용 / 3.14 안정화 시점\nTone: ~다\nKnowledge files (plugin-relative): skills/blog/philosophy.md, skills/blog/style-rules.md, skills/blog/templates.md, skills/blog/argumentation.md, skills/blog/ai-tell-rules.md\nCore message: Python 3.13 의 free-threaded 빌드(PEP 703)는 single-thread 성능 ~10% 손해를 받고 multi-thread CPU bound 에서 이득을 본다 - 모든 워크로드에 이득은 아니다.\nRequired facts (must appear in draft): Python 3.13, PEP 703, free-threaded, 10%, biased reference counting\n\nWrite the draft markdown only. Output the full markdown body starting with a single # H1 line. Stay strictly in Korean (≥ 70% Hangul characters in the body)."
+      }
+    ],
+    "tools": []
+  },
+  "response": {
+    "stop_reason": "end_turn",
+    "content": [
+      {
+        "type": "text",
+        "text": "# Python 3.13 free-threaded 빌드: GIL 제거의 실제 영향\n\nPython 3.13은 PEP 703을 구현한 free-threaded 빌드를 opt-in 형태로 출시했다. 이 빌드는 Global Interpreter Lock(GIL)을 제거하여 multi-thread 환경에서 진짜 병렬 실행을 가능하게 만든다. 하지만 모든 워크로드가 빨라지는 것은 아니다.\n\n## GIL이 보호했던 것\n\nGIL은 Python 객체의 reference counting을 보호하기 위해 존재했다. 여러 스레드가 동시에 같은 객체의 참조 카운터를 수정하면 race condition이 발생하고, 객체가 너무 일찍 해제되거나 메모리 누수가 생긴다. GIL은 한 번에 하나의 스레드만 Python 바이트코드를 실행하도록 강제하여 이 문제를 해결했다.\n\nsingle-thread 성능 측면에서 GIL은 이득이었다. lock을 잡고 푸는 오버헤드가 있지만, 여러 작은 lock을 관리하는 것보다 하나의 coarse-grained lock이 캐시 효율과 명령어 파이프라인에 유리했다.\n\n## free-threaded 빌드의 내부 메커니즘\n\nfree-threaded 빌드는 reference counting 보호를 위해 두 가지 기법을 도입했다. 첫 번째는 biased reference counting이다. 객체를 생성한 스레드가 그 객체를 독점적으로 사용하는 동안은 atomic operation 없이 reference count를 증감시킨다. 다른 스레드가 접근하는 순간 atomic operation으로 전환된다.\n\n두 번째는 deferred reference counting이다. 일부 reference count 변경을 즉시 반영하지 않고 큐에 쌓아두었다가 배치로 처리한다. 이는 atomic operation의 빈도를 줄인다.\n\n## 성능 트레이드오프와 호환성 비용\n\nCPython 벤치마크에서 free-threaded 빌드는 single-thread 성능이 약 10% 느려졌다. biased reference counting과 deferred reference counting의 분기 비용, atomic operation 오버헤드가 누적된 결과다.\n\n반면 multi-thread CPU bound 워크로드는 명확한 이득을 본다. 4-core에서 GIL 빌드 대비 3배 이상 빠른 케이스도 보고되었다. 하지만 I/O bound 워크로드는 이득이 크지 않다. GIL을 들고 있는 시간 자체가 짧았기 때문이다.\n\nC 확장 호환성 비용도 크다. 기존 C 확장은 GIL이 보호해준다고 가정했기 때문에, free-threaded 빌드에서는 명시적인 lock을 추가해야 한다. NumPy, pandas 같은 핵심 라이브러리가 아직 완전히 대응하지 못했다.\n\n## 요약\n\n- PEP 703의 free-threaded 빌드는 GIL을 제거하고 biased reference counting과 deferred reference counting으로 동시성 안전성을 확보했다\n- single-thread 성능은 약 10% 회귀했고, multi-thread CPU bound 워크로드에서 3배 이상 이득을 보는 케이스가 존재한다\n- I/O bound 워크로드는 이득이 제한적이며, C 확장 생태계의 호환성 작업이 병목이다\n- Python 3.13에서는 opt-in, 3.14에서 안정화 목표이며 워크로드 특성에 따라 빌드 선택이 필요하다"
+      }
+    ]
+  },
+  "dispatch_key": "3d9dc312b8f6609e6ef9c07ad08bff98d322f15e621e9addf2d849771c8691f5",
+  "format": "blog"
+}
