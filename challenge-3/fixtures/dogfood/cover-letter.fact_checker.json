@@ -1,0 +1,46 @@
+{
+  "path": "fixtures/dogfood/cover-letter.md",
+  "yaml": "known_facts.yml.example",
+  "verdict": "BLOCKED",
+  "summary": {
+    "numbers": 1,
+    "semver": 0,
+    "quotes": 0,
+    "dates": 0,
+    "proper_nouns": 6
+  },
+  "unknowns": {
+    "numbers": [
+      "1.4%"
+    ],
+    "semver": [],
+    "quotes": [],
+    "dates": [],
+    "proper_nouns": [
+      "Engineer",
+      "RAG",
+      "RAG",
+      "BERT",
+      "CTR",
+      "RAG"
+    ]
+  },
+  "found": {
+    "numbers": [
+      "10",
+      "1.4%"
+    ],
+    "semver": [],
+    "quotes": [],
+    "dates": [],
+    "proper_nouns": [
+      "Engineer",
+      "RAG",
+      "RAG",
+      "BERT",
+      "HuggingFace",
+      "CTR",
+      "RAG"
+    ]
+  }
+}

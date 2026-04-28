@@ -1,0 +1,30 @@
+{
+  "path": "fixtures/dogfood/letter.md",
+  "yaml": "known_facts.yml.example",
+  "verdict": "BLOCKED",
+  "summary": {
+    "numbers": 0,
+    "semver": 0,
+    "quotes": 1,
+    "dates": 0,
+    "proper_nouns": 0
+  },
+  "unknowns": {
+    "numbers": [],
+    "semver": [],
+    "quotes": [
+      "왜 이 숫자가 이 자리에 있는가"
+    ],
+    "dates": [],
+    "proper_nouns": []
+  },
+  "found": {
+    "numbers": [],
+    "semver": [],
+    "quotes": [
+      "왜 이 숫자가 이 자리에 있는가"
+    ],
+    "dates": [],
+    "proper_nouns": []
+  }
+}

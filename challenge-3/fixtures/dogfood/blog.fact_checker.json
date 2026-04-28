@@ -1,0 +1,57 @@
+{
+  "path": "fixtures/dogfood/blog.md",
+  "yaml": "known_facts.yml.example",
+  "verdict": "BLOCKED",
+  "summary": {
+    "numbers": 6,
+    "semver": 0,
+    "quotes": 0,
+    "dates": 0,
+    "proper_nouns": 4
+  },
+  "unknowns": {
+    "numbers": [
+      "0%",
+      "0%",
+      "15%",
+      "8%",
+      "0%",
+      "15%"
+    ],
+    "semver": [],
+    "quotes": [],
+    "dates": [],
+    "proper_nouns": [
+      "Exactly-Once",
+      "Semantics",
+      "EOS",
+      "EOS"
+    ]
+  },
+  "found": {
+    "numbers": [
+      "0.03%",
+      "0%",
+      "0.03%",
+      "0.03%",
+      "0%",
+      "15%",
+      "8%",
+      "0.03%",
+      "0%",
+      "15%"
+    ],
+    "semver": [],
+    "quotes": [],
+    "dates": [],
+    "proper_nouns": [
+      "Kafka",
+      "Exactly-Once",
+      "Semantics",
+      "EOS",
+      "EOS",
+      "Kafka",
+      "Kafka"
+    ]
+  }
+}

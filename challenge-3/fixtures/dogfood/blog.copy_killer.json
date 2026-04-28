@@ -1,0 +1,22 @@
+{
+  "path": "fixtures/dogfood/blog.md",
+  "ai_score": 0.24634085760117147,
+  "threshold": 0.35,
+  "verdict": "PASS",
+  "metrics": {
+    "sentence_length_variance": 0.277169019531855,
+    "avg_syllable_length": 0.42604651162790697,
+    "connector_frequency": 0.06294058408862034,
+    "r1_r7_residual": 0.0,
+    "monotone_ending_ratio": 0.9047619047619048,
+    "generic_modifier_density": 0.0
+  },
+  "weights": {
+    "sentence_length_variance": 0.2,
+    "avg_syllable_length": 0.1,
+    "connector_frequency": 0.2,
+    "r1_r7_residual": 0.3,
+    "monotone_ending_ratio": 0.15,
+    "generic_modifier_density": 0.05
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "path": "fixtures/dogfood/cover-letter.md",
+  "ai_score": 0.3004738350023247,
+  "threshold": 0.35,
+  "verdict": "PASS",
+  "metrics": {
+    "sentence_length_variance": 0.4370825508078018,
+    "avg_syllable_length": 0.6305732484076433,
+    "connector_frequency": 0.0,
+    "r1_r7_residual": 0.0,
+    "monotone_ending_ratio": 1.0,
+    "generic_modifier_density": 0.0
+  },
+  "weights": {
+    "sentence_length_variance": 0.2,
+    "avg_syllable_length": 0.1,
+    "connector_frequency": 0.2,
+    "r1_r7_residual": 0.3,
+    "monotone_ending_ratio": 0.15,
+    "generic_modifier_density": 0.05
+  }
+}
