@@ -10,7 +10,7 @@
 |---|------|------|------|
 | [challenge-1](./challenge-1) | Warehouse Picker VLA | 로봇 픽킹 에이전트 — Planner/Verifier/Task Manager + SmolVLA 통합 (Claude LLM + Vision) | 완료 · 140 tests pass |
 | [challenge-2](./challenge-2) | Reactive Investment Agent (RIA) | 서학개미용 포트폴리오 관리 CLI — Opus 4.7 판단 + Haiku 4.5 severity + pgvector 공시 RAG + 이벤트 interrupt | 완료 · 116 tests pass · VERIFY 10/10 · $0.50 / $50 |
-| [challenge-3](./challenge-3) | aiwriting Claude Code Plugin | 한국어 멀티포맷 글쓰기 플러그인 — writer/scrubber/copy-killer/structure-critic/fact-checker × blog/cover-letter/paper/letter | 진행 중 · overnight 예정 |
+| [challenge-3](./challenge-3) | aiwriting Claude Code Plugin | 한국어 멀티포맷 글쓰기 플러그인 — writer/scrubber/copy-killer/structure-critic/fact-checker × blog/cover-letter/paper/letter | 완료 · 113 tests pass · VERIFY 10/10 · dogfood 4/4 · ~$5.3 / $7.5 |
 
 ## 규칙
 
@@ -26,3 +26,4 @@
 - [`HARNESS.md`](./HARNESS.md) — 하네스 엔지니어링 원칙 + 도구 카탈로그
 - [`challenge-1/RETRO.md`](./challenge-1/RETRO.md) — 1차 회고 (VLA 로봇 픽킹)
 - [`challenge-2/RETRO.md`](./challenge-2/RETRO.md) — 2차 회고 (RIA, 4개 신규 원칙 도출 → CLAUDE.md §9~12 반영)
+- [`challenge-3/TIMELINE.md`](./challenge-3/TIMELINE.md) — 3차 overnight audit trail (Planner/Architect/Critic 합의 → Sprint 0~3 자율 실행 + 자가 결정 3건)
